@@ -13,7 +13,7 @@ import pandas as pd
 
 
 # gets the current working directory
-script_dir = os.getcwd()
+script_dir = 'path/to/your/script' 
 
 # change to the script's working directory
 os.chdir(script_dir)
@@ -124,13 +124,13 @@ def subset_training_data_overlap(time_interval: int = 10, overlap: int = 3) -> p
         # Append the current subset to the list of subsets
         subsets.append(current_subset)
 
-        # Create overlapping rows 
-        overlap_start_index = max(0, end_subset_index - overlap)
-        overlap_rows = training_data_overlap.iloc[overlap_start_index:end_subset_index].copy()
-        overlap_rows["subset"] = subset + 1  # Assign to the next subset
+        # # Create overlapping rows 
+        # overlap_start_index = max(0, end_subset_index - overlap)
+        # overlap_rows = training_data_overlap.iloc[overlap_start_index:end_subset_index].copy()
+        # overlap_rows["subset"] = subset + 1  # Assign to the next subset
 
-        # Append the overlap rows as the beginning of the next subset
-        subsets.append(overlap_rows)
+        # # Append the overlap rows as the beginning of the next subset
+        # subsets.append(overlap_rows)
 
         # Beginning of the next subset index
         beginning_subset_index = end_subset_index - overlap
