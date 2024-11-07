@@ -87,64 +87,49 @@ subset_training_data_seq() # 195 subsets are created with time_interval = 10s
 
 
 
-##### TRAINING DATA 1 - OVERLAPPING ##########
+##### TRAINING DATA 2 - OVERLAPPING ##########
 
 # in training - split in 10s overlapping 
 training_data_overlap = training_data.copy()
 
-
-def subset_training_data_overlap(time_interval: int = 10, overlap: int = 3) -> pd.DataFrame:
+def subset_training_data_overlap(training_data_overlap: pd.DataFrame, time_interval: int = 10, overlap: int = 3) -> pd.DataFrame:
     """
-    Splits the training_data DataFrame into overlapping subsets by creating new rows.
-    Each subset overlaps the previous subset by the specified overlap period.
+    Splits the training_data DataFrame into overlapping subsets.
     
     Parameters:
+        training_data_overlap (pd.DataFrame): The input DataFrame with a 'time' column.
         time_interval (int): The total time in seconds for each subset.
         overlap (int): The overlap time in seconds for the next subset.
         
     Returns:
         pd.DataFrame: A new DataFrame with repeated overlapping rows.
-    """    
-  
-    subsets = []
-    subset = 1
-    beginning_subset_index = 0
+    """
+    
+    # Sort by time to ensure correct interval calculation
+    #training_data_overlap = training_data_overlap.sort_values(by="time").reset_index(drop=True)
+    
+    # Calculate the number of rows to skip for each new subset (time_interval - overlap)
+    subset_step = time_interval - overlap
+    subsets = []  # List to collect subsets
+    subset_id = 1
 
-    while beginning_subset_index < len(training_data_overlap):
-        # Determine the end of the current subset
-        end_subset_index = beginning_subset_index
-        while (end_subset_index < len(training_data_overlap) - 1 and
-               training_data_overlap.iloc[end_subset_index]["time"] - training_data_overlap.iloc[beginning_subset_index]["time"] < time_interval):
-            end_subset_index += 1
-
-        # Select the current subset
-        current_subset = training_data_overlap.iloc[beginning_subset_index:end_subset_index].copy()
-        current_subset["subset"] = subset
-
-        # Append the current subset to the list of subsets
+    # Start creating subsets based on calculated time intervals
+    for start_idx in range(0, len(training_data_overlap), subset_step):
+        # Determine the end time for the current subset
+        end_time = training_data_overlap.iloc[start_idx]["time"] + time_interval
+        
+        # Select rows for the current subset based on the time interval
+        current_subset = training_data_overlap[(training_data_overlap["time"] >= training_data_overlap.iloc[start_idx]["time"]) &
+                                               (training_data_overlap["time"] < end_time)].copy()
+        
+        # Label this subset with a unique subset ID
+        current_subset["subset"] = subset_id
         subsets.append(current_subset)
+        
+        subset_id += 1  # Increment subset ID for the next iteration
 
-        # Create overlapping rows  # without this part it might overwrite the overlapping rows
-        overlap_start_index = max(0, end_subset_index - overlap)
-        overlap_rows = training_data_overlap.iloc[overlap_start_index:end_subset_index].copy()
-        overlap_rows["subset"] = subset + 1  # Assign to the next subset
-
-        # Append the overlap rows as the beginning of the next subset
-        subsets.append(overlap_rows)
-
-        # Beginning of the next subset index
-        beginning_subset_index = end_subset_index - overlap
-        subset += 1
-
-    # Concatenate all subsets into one df and reset the index
+    # Concatenate all subsets into one DataFrame
     result = pd.concat(subsets, ignore_index=True)
     return result
-
-subset_training_data_overlap()
-
-# Example usage
-overlapping_data = subset_training_data_overlap()
-print(overlapping_data)
-
 
 subset_training_data_overlap() # xxxxxx subsets are created with time_interval = 10s
