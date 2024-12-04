@@ -84,9 +84,6 @@ def subset_training_data_seq(time_interval: int=10) -> None:
 
 subset_training_data_seq() # 195 subsets are created with time_interval = 10s
 
-
-
-
 ##### TRAINING DATA 2 - OVERLAPPING ##########
 
 # in training - split in 10s overlapping 
@@ -113,12 +110,12 @@ def subset_training_data_overlap(training_data_overlap: pd.DataFrame, time_inter
     subsets = []  # List to collect subsets
     subset_id = 1
 
-    # Start creating subsets based on calculated time intervals
+    # Subsets based on calculated time intervals
     for start_idx in range(0, len(training_data_overlap), subset_step):
-        # Determine the end time for the current subset
+        # End time for the current subset
         end_time = training_data_overlap.iloc[start_idx]["time"] + time_interval
         
-        # Select rows for the current subset based on the time interval
+        # Rows for the current subset based on the time interval
         current_subset = training_data_overlap[(training_data_overlap["time"] >= training_data_overlap.iloc[start_idx]["time"]) &
                                                (training_data_overlap["time"] < end_time)].copy()
         
