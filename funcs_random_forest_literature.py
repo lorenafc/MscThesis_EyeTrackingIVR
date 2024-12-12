@@ -106,13 +106,18 @@ def calc_velocity_deg_s(df):
     
     import numpy as np
     
-    if "velocity" not in df.columns:
-        df["velocity"] = np.nan  
+    # if "velocity" not in df.columns:
+    #     df["velocity"] = np.nan  
+    
+    df = df[df["time_diff"] != 0].reset_index(drop=True)
     
     # df['cm_to_deg_inside_VE'] = pd.to_numeric(df['cm_to_deg_inside_VE'], errors='coerce')
     # df["time_diff"] = pd.to_numeric(df["time_diff"], errors='coerce')
        
     df["velocity"] = df['cm_to_deg_inside_VE']/df["time_diff"]
-    
+           
+    # for gaze in range(0, len(df)):
+    #     velocity = df.iloc[gaze]['cm_to_deg_inside_VE']/df.iloc[gaze]["time_diff"]
+    #     df.at[gaze,'velocity'] = velocity  
     
     return df
