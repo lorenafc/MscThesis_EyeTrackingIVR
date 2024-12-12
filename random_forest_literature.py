@@ -18,7 +18,6 @@ Behavior Reserch Methods 45, pp 684-695, doi:10.3758/s13428-012-0286-x
 
 """
 
-
 import numpy as np
 import os
 import pandas as pd
@@ -27,53 +26,42 @@ import funcs_random_forest_literature as funcs
 
 # set up environment
 # gets the current working directory
-script_dir =  r"C:\WUR_C\Thesis\scripts" #os.getcwd()
+script_dir =  r"\path\to\your\script" #os.getcwd()
 
 # change to the script's working directory
 os.chdir(script_dir)
 
-path_file = ".\data\joep\LLA2020_labeled.csv"
-path_file = os.path.join(script_dir, "data", "joep", "LLA2020_labeled.csv") #".\data\joep\LLA2020_labeled.csv"
+path_file = ".\path\to\your\file.csv"
 eye_tracking_data = pd.read_csv(path_file)
 
 
-eye_tracking_data_view_dist = apply_viewing_distance_df(eye_tracking_data)
-      
+eye_tracking_data_view_dist = apply_viewing_distance_df(eye_tracking_data)   
 eye_tracking_data_time_diff = calc_time_diff(eye_tracking_data_view_dist)
-
 eye_tracking_data_coord = calc_coordinates(eye_tracking_data_time_diff)
-
 eye_tracking_data_coord_dist = calc_coordinates_dist(eye_tracking_data_coord)  # function a bit slow to run
 
 eye_tracking_data_coord_dist['coordinates_dist'].head()
 
 eye_tracking_data_cm2deg = convert_cm_to_degree_inside_VE(eye_tracking_data_coord_dist)
 
-eye_tracking_data_cm2deg["cm_to_deg_inside_VE"].head()
-
 eye_tracking_data_cm2deg[['cm_to_deg_inside_VE', "time_diff"]].head()
 
-
 print(eye_tracking_data_cm2deg[['cm_to_deg_inside_VE', 'time_diff']].dtypes)
-
-
 print(eye_tracking_data_cm2deg[["cm_to_deg_inside_VE", "time_diff"]].isnull().sum())
 
-print((eye_tracking_data_cm2deg["cm_to_deg_inside_VE"] == 0).sum())  # Count zeroes in 'cm_to_deg_inside_VE'
-print((eye_tracking_data_cm2deg["time_diff"] == 0).sum())            # Count zeroes in 'time_diff'
-
-
+print((eye_tracking_data_cm2deg["cm_to_deg_inside_VE"] == 0).sum())  
+print((eye_tracking_data_cm2deg["time_diff"] == 0).sum())            
 
 eye_tracking_data_cm2deg = calc_velocity_deg_s(eye_tracking_data_coord_dist)
 
-print((eye_tracking_data_cm2deg["cm_to_deg_inside_VE"] == 0).sum())  # Count zeroes in 'cm_to_deg_inside_VE'
-print((eye_tracking_data_cm2deg["time_diff"] == 0).sum())            # Count zeroes in 'time_diff'
+eye_tracking_data_cm2deg = eye_tracking_data_cm2deg[(eye_tracking_data_cm2deg["cm_to_deg_inside_VE"] != 0) & (eye_tracking_data_cm2deg["time_diff"] != 0)].copy()
+
+print("Number of rows with zero values in 'cm_to_deg_inside_VE':", (eye_tracking_data_cm2deg["cm_to_deg_inside_VE"] == 0).sum())
+print("Number of rows with zero values in 'time_diff':", (eye_tracking_data_cm2deg["time_diff"] == 0).sum())
 
 
 eye_tracking_data_cm2deg["velocity"].head()
-
 eye_tracking_data_cm2deg[['cm_to_deg_inside_VE',"time_diff" ]].head()
-
 
 ######### save the df with this new feature
 
