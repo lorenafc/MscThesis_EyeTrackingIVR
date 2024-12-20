@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Dec  6 14:33:02 2024
+Created on Fri Dec  6 
 
 @author: Lorena Carpes
 """
 
-def calc_viewing_distance(lx,ly,lz,cx,cy,cz):
-    
-    import math
+import math
+import pandas as pd
+import numpy as np
+
+def calc_viewing_distance(lx,ly,lz,cx,cy,cz):   
     
     sqr_dist_x = (cx-lx)**2
     sqr_dist_y = (cy-ly)**2
@@ -32,8 +34,6 @@ def apply_viewing_distance_df(df):
 
 def calc_time_diff(df):
     
-    import pandas as pd
-    
     if "time_diff" not in df.columns:
         df["time_diff"] = ""         
         df["time_diff"] = df["time"].diff().fillna(0)
@@ -42,9 +42,6 @@ def calc_time_diff(df):
     return df
    
 def calc_coordinates(df):
-    
-    import math
-    import pandas as pd
     
     if "coordinates" not in df.columns:        
         df["coordinates"] = ""
@@ -60,9 +57,6 @@ def calc_coordinates(df):
     return df   
 
 def calc_coordinates_dist(df): # a bit slow to run
-    
-    import math
-    import pandas as pd
     
     if "coordinates_dist" not in df.columns:
         df["coordinates_dist"] = ""
@@ -84,8 +78,7 @@ def calc_coordinates_dist(df): # a bit slow to run
       
     return df
  
-def convert_cm_to_degree_inside_VE(df):
-    
+def convert_cm_to_degree_inside_VE(df):  # based on GazeParser library, by Hiroyuki Sogo. 
     
     if "cm_to_deg_inside_VE" not in df.columns:
         df["cm_to_deg_inside_VE"] = np.nan   
@@ -93,7 +86,7 @@ def convert_cm_to_degree_inside_VE(df):
     df['coordinates_dist'] = pd.to_numeric(df['coordinates_dist'], errors='coerce')
     df["viewing_distance"] = pd.to_numeric(df["viewing_distance"], errors='coerce')
 
-        # Drop rows where 'coordinates_dist' or 'viewing_distance' is NaN
+
     df = df.dropna(subset=['coordinates_dist', 'viewing_distance']).reset_index(drop=True)
     
     # Calculate cm_to_deg_inside_VE using vectorized operations
@@ -101,23 +94,26 @@ def convert_cm_to_degree_inside_VE(df):
     df['cm_to_deg_inside_VE'] = pd.to_numeric(df['cm_to_deg_inside_VE'], errors='coerce')
         
     return df
+
+
+def reorder_columns(df):
+
+    columns_to_move = ['observer', 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+    new_column_order = [col for col in df.columns if col not in columns_to_move] + columns_to_move
+    df = df[new_column_order]
+    return df
+
+
+def process_eye_tracking_data(df):
+
+    eye_tracking_data_view_dist = apply_viewing_distance_df(df)
+    eye_tracking_data_time_diff = calc_time_diff(eye_tracking_data_view_dist)
+    eye_tracking_data_coord = calc_coordinates(eye_tracking_data_time_diff)
+    eye_tracking_data_coord_dist = calc_coordinates_dist(eye_tracking_data_coord)  # slow function
+
+    # Convert distance from cm to degrees inside the VE
+    eye_tracking_data_cm2deg = convert_cm_to_degree_inside_VE(eye_tracking_data_coord_dist)    
+    eye_tracking_data_cm2deg_ordered = reorder_columns(eye_tracking_data_cm2deg)
     
-# def calc_velocity_deg_s(df):
-    
-#     import numpy as np
-    
-#     # if "velocity" not in df.columns:
-#     #     df["velocity"] = np.nan  
-    
-#     df = df[df["time_diff"] != 0].reset_index(drop=True)
-    
-#     # df['cm_to_deg_inside_VE'] = pd.to_numeric(df['cm_to_deg_inside_VE'], errors='coerce')
-#     # df["time_diff"] = pd.to_numeric(df["time_diff"], errors='coerce')
-       
-#     df["velocity"] = df['cm_to_deg_inside_VE']/df["time_diff"]
-           
-#     # for gaze in range(0, len(df)):
-#     #     velocity = df.iloc[gaze]['cm_to_deg_inside_VE']/df.iloc[gaze]["time_diff"]
-#     #     df.at[gaze,'velocity'] = velocity  
-    
-#     return df
+    return eye_tracking_data_cm2deg_ordered
+
