@@ -4,21 +4,13 @@ Created on Tue Oct 29 2024
 
 @author: Lorena Carpes
 
-
-The velocity and acceleration scrip was made based on GazeParser library, by Hiroyuki Sogo. 
-
-website: https://gazeparser.sourceforge.net/#
-
-Sogo, H. (2013) GazeParser: an open-source and multiplatform library for low-cost eye tracking and analysis. 
-Behavior Reserch Methods 45, pp 684-695, doi:10.3758/s13428-012-0286-x
-
 """
 
 
 import os
 import pandas as pd
 import json
-import Aa00_funcs_preprocessing_C_test_config_git_ignore as funcs
+import Aa00_funcs_preprocessing as funcs
 
 
 with open('config.json') as json_file:
