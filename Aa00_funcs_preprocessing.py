@@ -78,7 +78,7 @@ def calc_coordinates_dist(df): # a bit slow to run
       
     return df
  
-def convert_cm_to_degree_inside_VE(df):  # based on GazeParser library, by Hiroyuki Sogo. 
+def convert_cm_to_degree_inside_VE(df): # based on GazeParser library, by Hiroyuki Sogo.
     
     if "cm_to_deg_inside_VE" not in df.columns:
         df["cm_to_deg_inside_VE"] = np.nan   
