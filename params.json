@@ -1,0 +1,60 @@
+{
+  "general": {
+    "script_dir": ".",
+    "dataset": "LLA2020",
+    "random_seed": 123,
+    "output_dir": "output",
+    "preprocessed_data_file": "data/preprocessed_eye_tracking.csv",
+    "overwrite": false
+  },
+  "training": {
+    "train_test_split": 0.75,
+    "cross_validation_folds": 5
+  },
+  "gt1": {
+  "random_forest": {
+    "n_estimators": 50,
+    "max_depth": 6
+  }
+  },
+    "gt2": {
+  "random_forest": {
+    "n_estimators": 50,
+    "max_depth": 6
+  }
+  },
+    "gt3": {
+  "random_forest": {
+    "n_estimators": 50,
+    "max_depth": 6
+  }
+  },
+    "gt4": {
+  "random_forest": {
+    "n_estimators": 50,
+    "max_depth": 6
+  }
+  },
+    "gt5": {
+  "random_forest": {
+    "n_estimators": 50,
+    "max_depth": 6
+  }
+  },
+    "gt6": {
+  "random_forest": {
+    "n_estimators": 50,
+    "max_depth": 6
+  }
+  },
+    "gt7": {
+  "random_forest": {
+    "n_estimators": 50,
+    "max_depth": 6
+  }
+  },
+  "visualization": {
+    "create_fig": true,
+    "figure_format": "png"
+  }
+}
