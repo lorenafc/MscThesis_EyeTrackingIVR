@@ -35,9 +35,6 @@ os.chdir(script_dir)
 path_file = os.path.join(script_dir, config["data_path"])
 preprocessed_et_data = pd.read_csv(config["preprocessed_data_file"])
 
-print(preprocessed_et_data.head())
-
-print("teste A0a01")
 
 
 # # add velocity to the eye tracking data - when I add this inside a function it keeps running forever.
@@ -53,15 +50,33 @@ print("teste A0a01")
 # and Holmqvist (2010)
 # SAVITZKY-GOLD filter: https://medium.com/pythoneers/introduction-to-the-savitzky-golay-filter-a-comprehensive-guide-using-python-b2dd07a8e2ce#:~:text=The%20Savitzky%2DGolay%20filter%20is,explained%20further%20in%20this%20post).
 
+
 #calculate velocity - when I add this inside a function it keeps running forever.
 preprocessed_et_data["velocity_deg_s"] = preprocessed_et_data['cm_to_deg_inside_VE']/preprocessed_et_data["time_diff"]
 preprocessed_et_data["acceler_deg_s"] = preprocessed_et_data['velocity_deg_s']/preprocessed_et_data["time_diff"]
 
 extracted_features = preprocessed_et_data
 
-output_file = os.path.join(script_dir, config["extracted_features_file"])
-extracted_features.to_csv(output_file, index=False)
+output_file_preprocesed_and_extracted = os.path.join(script_dir, config["prepr_and_features_file"])
+extracted_features.to_csv(output_file_preprocesed_and_extracted, index=False)
 
+
+
+# only the extracted features and GTs:
+
+only_extracted_features_and_GTs = extracted_features.drop(columns=['time', 'observer', 'coordinates', 'coordinates_dist','cm_to_deg_inside_VE','L_x', 'L_y', 'L_z', 'C_x', 'C_y', 'C_z', 'viewing_distance','time_diff'])
+
+right_order = ['velocity_deg_s', 'acceler_deg_s', 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+only_extracted_features_and_GTs_reordered = extracted_features[right_order]
+
+
+output_file_features_GTs = os.path.join(script_dir, config["only_extracted_features_file_and_GTs"])
+only_extracted_features_and_GTs_reordered.to_csv(output_file_features_GTs, index=False)
+
+
+
+
+### feature importace and divide in 100 Hz!!!
 
 
 
