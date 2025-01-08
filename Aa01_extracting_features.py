@@ -54,21 +54,15 @@ preprocessed_et_data = pd.read_csv(config["preprocessed_data_file"])
 #calculate velocity - when I add this inside a function it keeps running forever.
 preprocessed_et_data["velocity_deg_s"] = preprocessed_et_data['cm_to_deg_inside_VE']/preprocessed_et_data["time_diff"]
 preprocessed_et_data["acceler_deg_s"] = preprocessed_et_data['velocity_deg_s']/preprocessed_et_data["time_diff"]
-
 extracted_features = preprocessed_et_data
 
 output_file_preprocesed_and_extracted = os.path.join(script_dir, config["prepr_and_features_file"])
 extracted_features.to_csv(output_file_preprocesed_and_extracted, index=False)
 
-
-
 # only the extracted features and GTs:
-
 only_extracted_features_and_GTs = extracted_features.drop(columns=['time', 'observer', 'coordinates', 'coordinates_dist','cm_to_deg_inside_VE','L_x', 'L_y', 'L_z', 'C_x', 'C_y', 'C_z', 'viewing_distance','time_diff'])
-
 right_order = ['velocity_deg_s', 'acceler_deg_s', 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
 only_extracted_features_and_GTs_reordered = extracted_features[right_order]
-
 
 output_file_features_GTs = os.path.join(script_dir, config["only_extracted_features_file_and_GTs"])
 only_extracted_features_and_GTs_reordered.to_csv(output_file_features_GTs, index=False)

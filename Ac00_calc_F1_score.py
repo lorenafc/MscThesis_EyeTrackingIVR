@@ -31,6 +31,9 @@ X_test_file = os.path.join(script_dir, config["X_test_data_file"])
 X_train = pd.read_csv(X_train_file)
 X_test = pd.read_csv(X_test_file)
 
+#convert df in numpy arrays for RF model
+X_train = X_train #.values
+X_test = X_test #.values
 
 y_train_dict = {}
 y_test_dict = {}
@@ -41,8 +44,7 @@ for i in range(1, 8):
     
     y_train_dict[i] = pd.read_csv(y_train_file)
     y_test_dict[i] = pd.read_csv(y_test_file)
-
-
+    
 
 print("X_train shape:", X_train.shape)
 print("X_test shape:", X_test.shape)
@@ -57,9 +59,10 @@ for i in range(1, 8):
     
 for i in range(1,8):
     
-    y_train = y_train_dict[i]
-    y_test = y_test_dict[i]
-
+    #convert df to array and then 1D arrays for RF model
+    y_train = y_train_dict[i].values.ravel()
+    y_test = y_test_dict[i].values.ravel()
+    
     n_estimators = params[f"gt{i}"]['random_forest']['n_estimators']
     max_depth = params[f"gt{i}"]['random_forest']['max_depth']
     
@@ -79,7 +82,7 @@ for i in range(1,8):
     
     #####################
 
-# using 2 features - velocity and acceleration:
+# using 2 features only - velocity and acceleration:
     
 # GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 82% - 1 - fixation, 75% 0 - undefined
 # GT1 - Train Accuracy: 78.32%
@@ -114,6 +117,11 @@ for i in range(1,8):
 # GT7 - Train Accuracy: 74.85%
 # GT7 - Test Accuracy: 75.38%
 
+from statistics import mean 
+
+f1 = [82,76,81,80,80,81,78]
+average_f1_extracted_features = mean(f1)
+print(round(average_f1_extracted_features,2),"%") # 79.71 % joep  μsF1 0.753
 
 
 """ f1-score = 0.82 (1 fixation), 0.75 (0 no fixation)

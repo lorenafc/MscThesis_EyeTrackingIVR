@@ -29,25 +29,13 @@ path_file = os.path.join(script_dir, config["data_path"])
 extracted_features = pd.read_csv(config["only_extracted_features_file_and_GTs"])
 
 
-
-print("teste Ab00")
-
-
-
-
-
-# X train and X test without GT1
+###### X train and X test without GT1
 
 
 eye_tracking_data_without_GT1 = extracted_features.drop(columns=['GT1','GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7'])
-# eye_tracking_data_without_GT1 = eye_tracking_data_without_GT1.drop(columns=['time', 'observer', 'coordinates', 'coordinates_dist','cm_to_deg_inside_VE'])
-
-# ## only acceleration and velocity:   
-# eye_tracking_data_without_GT1 = eye_tracking_data_without_GT1.drop(columns=['L_x', 'L_y', 'L_z', 'C_x', 'C_y', 'C_z', 'viewing_distance','time_diff'])
-
 train_split = params["training"]["train_test_split"] #0.75
 
-# Creating data indices for training and test splits: source: LSTM autoencoder time series https://github.com/fabiozappo/LSTM-Autoencoder-Time-Series/blob/main/code/main.py
+# training and test splits  source: LSTM autoencoder time series https://github.com/fabiozappo/LSTM-Autoencoder-Time-Series/blob/main/code/main.py
 dataset_size = len(eye_tracking_data_without_GT1)
 indices = list(range(dataset_size))
 split = int(np.floor(train_split * dataset_size))
@@ -55,19 +43,15 @@ split = int(np.floor(train_split * dataset_size))
 X_et_train_without_GT1 = eye_tracking_data_without_GT1.iloc[:split, :]
 X_et_test_without_GT1 = eye_tracking_data_without_GT1.iloc[split:, :]
 
-
-
-# save dfs
+# save X train and X test dfs
 X_train_output_file = os.path.join(script_dir, config["X_train_data_file"])
 X_test_output_file = os.path.join(script_dir, config["X_test_data_file"])
-
 print("X train and X test saved")
 
 X_et_train_without_GT1.to_csv(X_train_output_file, index=False)
 X_et_test_without_GT1.to_csv(X_test_output_file, index=False)
 
-
-#convert in numpy arrays
+#convert df in numpy arrays for RF model
 X_train = X_et_train_without_GT1.values
 X_test = X_et_test_without_GT1.values
 
@@ -86,18 +70,21 @@ for i in range (1,8):
     y_GT_train = y_GT.iloc[:split, :]
     y_GT_test = y_GT.iloc[split:, :]
     
-    # save dfs
+    # save y train and y test GT1 to GT7 dfs
     y_train_output_file = os.path.join(script_dir, f"{config['y_train_data_file']}_GT{i}.csv")
     y_test_output_file = os.path.join(script_dir, f"{config['y_test_data_file']}_GT{i}.csv")
-    
     print(f" y train and test of GT{i} saved")
 
     y_GT_train.to_csv(y_train_output_file, index=False)
     y_GT_test.to_csv(y_test_output_file, index=False)
     
-    y_train_dict[i] = y_GT_train.values.ravel()
-    y_test_dict[i] = y_GT_test.values.ravel()
+    #convert in numpy 1D arrays for RF model
+    y_train_dict[i] = y_GT_train.values #.ravel()
+    y_test_dict[i] = y_GT_test.values#.ravel()
     
+
+
+### feature importace and divide in 100 Hz!!!
 
 ### RANDOM FOREST:
 
@@ -110,14 +97,14 @@ for i in range(1,8):
     
     rfc=RandomForestClassifier()
     param_grid = { 
-        'n_estimators': [10,12,14,16,20,50,100,150,200,250], # add 25  - final version (there is 25 in joep best param - selected GT1 and GT2)
-        'max_depth' : [1,3,6,9,10,11,12,15] # add 2, 7, 4 joep best param 2 - GT2 and 7 GT6 
+        'n_estimators': [10,12,15,25,50,100,150,200,250], # add 25  - final version (there is 25 in joep best param - selected GT1 and GT2)
+        'max_depth' : [1,2,3,4,5,6,7,8,9,10,11,12,15] # add 2, 7, 4 joep best param 2 - GT2 and 7 GT6 
     }
     CV_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv= 5)
     CV_rfc.fit(X_train, y_train)
-    
     print(f" for the ground truth GT{i} the best parameters are: {CV_rfc.best_params_}")
-    
+
+  
     
     # best_params = CV_rfc.best_params_
     
@@ -134,11 +121,7 @@ for i in range(1,8):
     # print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
     
 
- 
 
-
-### feature importace and divide in 100 Hz!!!
-    
 
 ###### UPDATE BEST PARAMS IN JSON FILE
 
