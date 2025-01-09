@@ -70,8 +70,31 @@ only_extracted_features_and_GTs_reordered.to_csv(output_file_features_GTs, index
 
 
 
-### feature importace and divide in 100 Hz!!!
+### feature importace and divide in 86 Hz!!!
 
+
+#### Data 86 Hz 
+
+preprocessed_et_data_86Hz = pd.read_csv(config["preprocessed_data_86Hz_file"])
+
+
+
+
+#calculate velocity - when I add this inside a function it keeps running forever.
+preprocessed_et_data_86Hz["velocity_deg_s"] = preprocessed_et_data_86Hz['cm_to_deg_inside_VE']/preprocessed_et_data_86Hz["time_diff"]
+preprocessed_et_data_86Hz["acceler_deg_s"] = preprocessed_et_data_86Hz['velocity_deg_s']/preprocessed_et_data_86Hz["time_diff"]
+extracted_features_86Hz = preprocessed_et_data_86Hz
+
+output_file_preprocesed_and_extracted_86Hz = os.path.join(script_dir, config["prepr_and_features_file_86Hz"])
+extracted_features_86Hz.to_csv(output_file_preprocesed_and_extracted_86Hz, index=False)
+
+# only the extracted features and GTs:
+only_extracted_features_and_GTs_86Hz = extracted_features_86Hz.drop(columns=['time', 'observer', 'coordinates', 'coordinates_dist','cm_to_deg_inside_VE','L_x', 'L_y', 'L_z', 'C_x', 'C_y', 'C_z', 'viewing_distance','time_diff'])
+right_order = ['velocity_deg_s', 'acceler_deg_s', 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+only_extracted_features_and_GTs_reordered_86Hz = extracted_features_86Hz[right_order]
+
+output_file_features_GTs_86Hz = os.path.join(script_dir, config["only_extracted_features_and_GTs_86Hz_file"])
+only_extracted_features_and_GTs_reordered_86Hz.to_csv(output_file_features_GTs_86Hz, index=False)
 
 
 

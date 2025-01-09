@@ -26,8 +26,13 @@ with open('params.json') as params_file:
 script_dir = config["script_dir"]  
 os.chdir(script_dir)  
 
-X_train_file = os.path.join(script_dir, config["X_train_data_file"])
+# X_train_file = os.path.join(script_dir, config["X_train_data_file"])
+X_train_file = os.path.join(script_dir, config["X_train_data_86Hz_file"])
+
+# X_test_file = os.path.join(script_dir, config["X_test_data_86Hz_file"]) # X test must be original. not the 86Hz
 X_test_file = os.path.join(script_dir, config["X_test_data_file"])
+
+
 X_train = pd.read_csv(X_train_file)
 X_test = pd.read_csv(X_test_file)
 
@@ -39,8 +44,12 @@ y_train_dict = {}
 y_test_dict = {}
 
 for i in range(1, 8):  
-    y_train_file = os.path.join(script_dir, f"{config['y_train_data_file']}_GT{i}.csv")
+    # y_train_file = os.path.join(script_dir, f"{config['y_train_data_file']}_GT{i}.csv")
+    y_train_file = os.path.join(script_dir, f"{config['y_train_data_86Hz_file']}_GT{i}.csv")
+    
+    # y_test_file = os.path.join(script_dir, f"{config['y_test_data_86Hz_file']}_GT{i}.csv") # Y test must be original. not the 86Hz
     y_test_file = os.path.join(script_dir, f"{config['y_test_data_file']}_GT{i}.csv")
+    
     
     y_train_dict[i] = pd.read_csv(y_train_file)
     y_test_dict[i] = pd.read_csv(y_test_file)
@@ -83,33 +92,80 @@ for i in range(1,8):
     #####################
 
 # using 2 features only - velocity and acceleration:
+# for the 86Hz I use the best params of the 44Hz because the code take too many hours too long, so 86Hz best params could be a different value, but it outperfors the original dataset
+# f1 original 79.71 %, f1 86Hz: 80.14 % 
     
 # GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 82% - 1 - fixation, 75% 0 - undefined
 # GT1 - Train Accuracy: 78.32%
 # GT1 - Test Accuracy: 78.94%
 
+#- 86Hz -  but for test I used the original dataset.
+
+# GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 77% 0 - undefined
+# GT1 - Train Accuracy: 79.48%
+# GT1 - Test Accuracy: 78.96%
+
+
+########
+
 # GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 76% - 1 - fixation, 79% 0 - undefined
 # GT2 - Train Accuracy: 76.71%
 # GT2 - Test Accuracy: 77.69%
 
+# 86Hz-  but for test I used the original dataset.
+# GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 79% - 1 - fixation, 76% 0 - undefined    
+# GT2 - Train Accuracy: 77.90%
+# GT2 - Test Accuracy: 77.72%
 
+#######
 # GT3 - {'max_depth': 6, 'n_estimators': 200} f1 = 81% - 1 - fixation, 74% 0 - undefined
 #GT3 - Train Accuracy: 76.78%
 #GT3 - Test Accuracy: 77.82%
+
+#86Hz -  but for test I used the original dataset.
+# GT3 - {'max_depth': 6, 'n_estimators': 200} f1 = 81% - 1 - fixation, 73% 0 - undefined
+# GT3 - Train Accuracy: 77.89%
+# GT3 - Test Accuracy: 77.73%
+
+
+########
 
 # GT4 - {'max_depth': 6, 'n_estimators': 50} f1 =  80 % - 1 - fixation, 72 % 0 - undefined
 # GT4 - Train Accuracy: 75.81%
 # GT4 - Test Accuracy: 76.48%
 
+#86Hz - but for test I used the original dataset.
+
+# GT4 - {'max_depth': 6, 'n_estimators': 50} f1 =  80 % - 1 - fixation, 72 % 0 - undefined
+# GT4 - Train Accuracy: 76.82%
+# GT4 - Test Accuracy: 76.42%
+
+
+#######
 
 # GT5 -{'max_depth': 6, 'n_estimators': 200} f1 = 80% - 1 - fixation, 71% 0 - undefined
 # GT5 - Train Accuracy: 76.01%
 # GT5 - Test Accuracy: 76.40%
 
+#86Hz - but test original dataset.
+
+# GT5 -{'max_depth': 6, 'n_estimators': 200} f1 = 80% - 1 - fixation, 71% 0 - undefined
+# GT5 - Train Accuracy: 76.91%
+# GT5 - Test Accuracy: 76.32%
+
+####
 
 # GT6 -{'max_depth': 6, 'n_estimators': 200} f1 = 81% - 1 - fixation, 70% 0 - undefined
 # GT6 - Train Accuracy: 76.16%
 # GT6 - Test Accuracy: 76.45%
+
+#86Hz - but test original dataset.
+
+# GT6 -{'max_depth': 6, 'n_estimators': 200} f1 = 81% - 1 - fixation, 69% 0 - undefined
+# GT6 - Train Accuracy: 77.16%
+# GT6 - Test Accuracy: 76.32%
+
+######
 
 
 
@@ -117,11 +173,29 @@ for i in range(1,8):
 # GT7 - Train Accuracy: 74.85%
 # GT7 - Test Accuracy: 75.38%
 
+#86Hz - but test original dataset.
+
+# GT7 -{'max_depth': 6, 'n_estimators': 200} f1 = 78% - 1 - fixation, 72% 0 - undefined
+# GT7 - Train Accuracy: 75.91%
+# GT7 - Test Accuracy: 75.45%
+
+
+# dataset original - 44Hz
 from statistics import mean 
 
 f1 = [82,76,81,80,80,81,78]
 average_f1_extracted_features = mean(f1)
 print(round(average_f1_extracted_features,2),"%") # 79.71 % joep  μsF1 0.753
+
+
+# dataset interpolated- 86Hz
+from statistics import mean 
+
+f1 = [82,79,81,80,80,81,78]
+average_f1_extracted_features = mean(f1)
+print(round(average_f1_extracted_features,2),"%") # 80.14 % joep  μsF1 0.753
+
+
 
 
 """ f1-score = 0.82 (1 fixation), 0.75 (0 no fixation)
@@ -145,3 +219,5 @@ True Positives (TP): Correctly identified fixations (12417).
 
 
 """ 
+
+# Dataset 86Hz 

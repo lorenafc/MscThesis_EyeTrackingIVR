@@ -26,7 +26,8 @@ script_dir = config["script_dir"]
 os.chdir(script_dir)  
 
 path_file = os.path.join(script_dir, config["data_path"])
-extracted_features = pd.read_csv(config["only_extracted_features_file_and_GTs"])
+# extracted_features = pd.read_csv(config["only_extracted_features_file_and_GTs"])
+extracted_features = pd.read_csv(config["only_extracted_features_and_GTs_86Hz_file"])
 
 
 ###### X train and X test without GT1
@@ -44,8 +45,12 @@ X_et_train_without_GT1 = eye_tracking_data_without_GT1.iloc[:split, :]
 X_et_test_without_GT1 = eye_tracking_data_without_GT1.iloc[split:, :]
 
 # save X train and X test dfs
-X_train_output_file = os.path.join(script_dir, config["X_train_data_file"])
-X_test_output_file = os.path.join(script_dir, config["X_test_data_file"])
+# X_train_output_file = os.path.join(script_dir, config["X_train_data_file"])
+# X_test_output_file = os.path.join(script_dir, config["X_test_data_file"])
+
+X_train_output_file = os.path.join(script_dir, config["X_train_data_86Hz_file"])
+X_test_output_file = os.path.join(script_dir, config["X_test_data_86Hz_file"])
+
 print("X train and X test saved")
 
 X_et_train_without_GT1.to_csv(X_train_output_file, index=False)
@@ -71,8 +76,12 @@ for i in range (1,8):
     y_GT_test = y_GT.iloc[split:, :]
     
     # save y train and y test GT1 to GT7 dfs
-    y_train_output_file = os.path.join(script_dir, f"{config['y_train_data_file']}_GT{i}.csv")
-    y_test_output_file = os.path.join(script_dir, f"{config['y_test_data_file']}_GT{i}.csv")
+    # y_train_output_file = os.path.join(script_dir, f"{config['y_train_data_file']}_GT{i}.csv")
+    # y_test_output_file = os.path.join(script_dir, f"{config['y_test_data_file']}_GT{i}.csv")
+    
+    y_train_output_file = os.path.join(script_dir, f"{config['y_train_data_86Hz_file']}_GT{i}.csv")
+    y_test_output_file = os.path.join(script_dir, f"{config['y_test_data_86Hz_file']}_GT{i}.csv")
+    
     print(f" y train and test of GT{i} saved")
 
     y_GT_train.to_csv(y_train_output_file, index=False)
@@ -84,25 +93,25 @@ for i in range (1,8):
     
 
 
-### feature importace and divide in 100 Hz!!!
+### feature importace z!!!
 
 ### RANDOM FOREST:
 
-for i in range(1,8):
+# for i in range(1,8):
     
-    print(f"Training Random Forest for GT{i}")
+#     print(f"Training Random Forest for GT{i}")
     
-    y_train = y_train_dict[i]
-    y_test = y_test_dict[i]
+#     y_train = y_train_dict[i]
+#     y_test = y_test_dict[i]
     
-    rfc=RandomForestClassifier()
-    param_grid = { 
-        'n_estimators': [10,12,15,25,50,100,150,200,250], # add 25  - final version (there is 25 in joep best param - selected GT1 and GT2)
-        'max_depth' : [1,2,3,4,5,6,7,8,9,10,11,12,15] # add 2, 7, 4 joep best param 2 - GT2 and 7 GT6 
-    }
-    CV_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv= 5)
-    CV_rfc.fit(X_train, y_train)
-    print(f" for the ground truth GT{i} the best parameters are: {CV_rfc.best_params_}")
+#     rfc=RandomForestClassifier()
+#     param_grid = { 
+#         'n_estimators': [10,12,15,25,50,100,150,200,250], # add 25  - final version (there is 25 in joep best param - selected GT1 and GT2)
+#         'max_depth' : [1,2,3,4,5,6,7,8,9,10,11,12,15] # add 2, 7, 4 joep best param 2 - GT2 and 7 GT6 
+#     }
+#     CV_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv= 5)
+#     CV_rfc.fit(X_train, y_train)
+#     print(f" for the ground truth GT{i} the best parameters are: {CV_rfc.best_params_}")
 
   
     

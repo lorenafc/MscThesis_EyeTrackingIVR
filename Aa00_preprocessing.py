@@ -96,6 +96,14 @@ preproc_merged_no_float_zero.reset_index(drop=True, inplace=True)
 # Print the result
 print(preproc_merged_no_float_zero.head())
 
+
+
+output_file_86Hz = os.path.join(script_dir, config["preprocessed_data_86Hz_file"])
+preproc_merged_no_float_zero.to_csv(output_file_86Hz, index=False)
+
+
+
+
 ## if __name__ == "__main__":
     
 #    
