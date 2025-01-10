@@ -118,6 +118,12 @@ for i in range(1,8):
 # GT1 - Train Accuracy: 82.68%
 # GT1 - Test Accuracy: 82.89%
 
+
+# using disp degree original dataset:
+    
+# GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 81% 0 - undefined  
+
+
 ########
 
 # GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 76% - 1 - fixation, 79% 0 - undefined
@@ -136,6 +142,11 @@ for i in range(1,8):
 # GT2 - Train Accuracy: 81.79%
 # GT2 - Test Accuracy: 82.45%
 
+
+# using disp degree original dataset:
+    
+# GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 82% - 1 - fixation, 82% 0 - undefined  
+
 #######
 # GT3 - {'max_depth': 6, 'n_estimators': 200} f1 = 81% - 1 - fixation, 74% 0 - undefined
 #GT3 - Train Accuracy: 76.78%
@@ -152,6 +163,9 @@ for i in range(1,8):
 # GT3 - Train Accuracy: 81.51%
 # GT3 - Test Accuracy: 81.90%
 
+# using disp degree original dataset:
+    
+# GT3 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 80% 0 - undefined  
 
 ########
 
@@ -171,6 +185,10 @@ for i in range(1,8):
 # GT4 - Train Accuracy: 80.98%
 # GT4 - Test Accuracy: 80.89%
 
+# using disp degree original dataset:
+    
+# GT4 - {'max_depth': 6, 'n_estimators': 50} f1 = 82% - 1 - fixation, 79% 0 - undefined  
+
 #######
 
 # GT5 -{'max_depth': 6, 'n_estimators': 200} f1 = 80% - 1 - fixation, 71% 0 - undefined
@@ -189,6 +207,9 @@ for i in range(1,8):
 # GT5 - Train Accuracy: 80.85%
 # GT5 - Test Accuracy: 80.77%
 
+# using disp degree original dataset:
+    
+# GT5 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 78% 0 - undefined 
 
 ####
 
@@ -208,6 +229,9 @@ for i in range(1,8):
 # GT6 - Train Accuracy: 81.08%
 # GT6 - Test Accuracy: 80.66%
 
+# using disp degree original dataset:
+    
+# GT6 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 77% 0 - undefined 
 
 ######
 
@@ -226,9 +250,14 @@ for i in range(1,8):
 
 # using mean_diff degree original dataset:
     
-# GT6 - {'max_depth': 6, 'n_estimators': 50} f1 = 81% - 1 - fixation, 79% 0 - undefined  
+# GT7 - {'max_depth': 6, 'n_estimators': 50} f1 = 81% - 1 - fixation, 79% 0 - undefined  
 # GT7 - Train Accuracy: 80.29%
 # GT7 - Test Accuracy: 80.30%
+
+# using disp degree original dataset:
+    
+# GT7 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 77% 0 - undefined 
+
 
 # dataset original - 44Hz
 from statistics import mean 
@@ -252,13 +281,19 @@ average_f1_extracted_features = mean(f1)
 print(round(average_f1_extracted_features,2),"%") # 82.86 % joep  μsF1 0.753 - No extracted features 
 
 # dataset original vel, acc and MEAN DIFF:
-from statistics import mean    
+from statistics import mean 
+   
 f1 = [85,83,84,82,83,84,81]
 average_f1_extracted_features = mean(f1)
 print(round(average_f1_extracted_features,2),"%") # 83.14 % joep  μsF1 0.753 - No extracted features  
 
 
-
+# dataset original vel, acc, MEAN DIFF and DISP deg: - ## F1 decreased when Disp degrees was included!
+from statistics import mean 
+   
+f1 = [84,82,83,82,83,83,81]
+average_f1_extracted_features = mean(f1)
+print(round(average_f1_extracted_features,2),"%") # 82.57 % joep  μsF1 0.753 - No extracted features  
 
 
 """ f1-score = 0.82 (1 fixation), 0.75 (0 no fixation)

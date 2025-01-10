@@ -52,7 +52,7 @@ def calc_mean_dist_m(df): # a bit slow to run
     return df    
 
 
-def calc_viewing_distance(lx,ly,lz,cx,cy,cz):    # Calcuulate only before
+def calc_viewing_distance(lx,ly,lz,cx,cy,cz):    # Calculate only before
     
     sqr_dist_x = (cx-lx)**2
     sqr_dist_y = (cy-ly)**2
@@ -94,5 +94,62 @@ def mean_diff_degree_inside_VE(df): # based on GazeParser library, by Hiroyuki S
     
     # Round mean_diff_deg to 4 decimal places
     df["mean_diff_deg"] = df["mean_diff_deg"].round(4)
+        
+    return df
+
+
+######## DISPERSION #################
+
+def calculate_dispersion_meters(df, x_column, y_column, z_column, window=5, center = True): # window = 5 
+
+    df['dispersion_meters'] = (
+        df[x_column].rolling(window, center=center).max() - df[x_column].rolling(window, center=center).min() +
+        df[y_column].rolling(window, center=center).max() - df[y_column].rolling(window, center=center).min() 
+        +  df[z_column].rolling(window, center=center).max() - df[z_column].rolling(window, center=center).min()# 
+       
+    )
+    
+    return df
+
+
+def apply_viewing_distance_df(df, df_new_col, lx_col, ly_col, lz_col, cx_col, cy_col, cz_col):
+
+    if df_new_col not in df.columns:
+        df[df_new_col] = ""
+
+    for gaze, row in df.iterrows():
+        viewing_distance = calc_viewing_distance(
+            row[lx_col],
+            row[ly_col],
+            row[lz_col],
+            row[cx_col],
+            row[cy_col],
+            row[cz_col]
+        )
+        df.at[gaze, df_new_col] = viewing_distance
+
+    # Round the entire column after the loop
+    df[df_new_col] = pd.to_numeric(df[df_new_col], errors='coerce').round(4)
+
+    return df
+
+
+def convert_met_to_degree(df, df_new_col_deg, col_dist_meters, col_view_dist): # based on GazeParser library, by Hiroyuki Sogo.
+    
+    if df_new_col_deg not in df.columns:
+        df[df_new_col_deg] = np.nan   
+        
+    df[col_dist_meters] = pd.to_numeric(df[col_dist_meters], errors='coerce')
+    df[col_view_dist] = pd.to_numeric(df[col_view_dist], errors='coerce')
+
+
+    df = df.dropna(subset=[col_dist_meters, col_view_dist]).reset_index(drop=True)
+    
+    # Calculate cm_to_deg_inside_VE using vectorized operations
+    df[df_new_col_deg] = (180 / np.pi * np.arctan(df[col_dist_meters] / (2 * df[col_view_dist])))
+    df[df_new_col_deg] = pd.to_numeric(df[df_new_col_deg], errors='coerce')
+    
+    # Round mean_diff_deg to 4 decimal places
+    df[df_new_col_deg] = df[df_new_col_deg].round(4)
         
     return df
