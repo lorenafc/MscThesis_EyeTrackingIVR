@@ -9,6 +9,9 @@ import math
 import pandas as pd
 import numpy as np
 
+
+
+
 def calc_viewing_distance(lx,ly,lz,cx,cy,cz):   
     
     sqr_dist_x = (cx-lx)**2
@@ -117,4 +120,31 @@ def process_eye_tracking_data(df):
     
     return eye_tracking_data_cm2deg_ordered
 
-#convert data to 100Hz 
+
+
+def calculate_average_window(df, columns, window=4): #win = 14 to be close to 100ms (approx 90ms)
+
+    for column in columns:
+        results = []
+        for row_index in range(len(df)):
+            # Get the range before and after the row
+            start_before = max(0, row_index - window)
+            end_after = min(len(df), row_index + window + 1)
+
+            # Samples before
+            samples_before = df[start_before:row_index]
+            avg_before = np.nanmean(samples_before[column]) if len(samples_before) > 0 else np.nan
+
+            # Samples after
+            samples_after = df[row_index + 1:end_after]
+            avg_after = np.nanmean(samples_after[column]) if len(samples_after) > 0 else np.nan
+
+            # Append the result as a tuple (avg_before, avg_after)
+            results.append((avg_before, avg_after))
+
+        # Add the results to the DataFrame
+        df[f'{column}_Avg_Before_Win{window}'] = [result[0] for result in results]
+        df[f'{column}_Avg_After_Win{window}'] = [result[1] for result in results]
+
+    return df
+

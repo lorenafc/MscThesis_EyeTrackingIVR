@@ -25,9 +25,13 @@ with open('params.json') as params_file:
 script_dir = config["script_dir"]  
 os.chdir(script_dir)  
 
-path_file = os.path.join(script_dir, config["data_path"])
+# path_file = os.path.join(script_dir, config["data_path"])
 # extracted_features = pd.read_csv(config["only_extracted_features_file_and_GTs"])
-extracted_features = pd.read_csv(config["only_extracted_features_and_GTs_86Hz_file"])
+# extracted_features = pd.read_csv(config["only_extracted_features_and_GTs_86Hz_file"]) #86Hz
+
+
+extracted_features = pd.read_csv("data/prAzza01_only_extracted_features_GTs_eye_tracking_MEAN_DIFF_DEG.csv") # mean_diff degree added
+
 
 
 ###### X train and X test without GT1
@@ -45,11 +49,11 @@ X_et_train_without_GT1 = eye_tracking_data_without_GT1.iloc[:split, :]
 X_et_test_without_GT1 = eye_tracking_data_without_GT1.iloc[split:, :]
 
 # save X train and X test dfs
-# X_train_output_file = os.path.join(script_dir, config["X_train_data_file"])
-# X_test_output_file = os.path.join(script_dir, config["X_test_data_file"])
+X_train_output_file = os.path.join(script_dir, config["X_train_data_file"])
+X_test_output_file = os.path.join(script_dir, config["X_test_data_file"])
 
-X_train_output_file = os.path.join(script_dir, config["X_train_data_86Hz_file"])
-X_test_output_file = os.path.join(script_dir, config["X_test_data_86Hz_file"])
+# X_train_output_file = os.path.join(script_dir, config["X_train_data_86Hz_file"])
+# X_test_output_file = os.path.join(script_dir, config["X_test_data_86Hz_file"])
 
 print("X train and X test saved")
 
@@ -76,11 +80,11 @@ for i in range (1,8):
     y_GT_test = y_GT.iloc[split:, :]
     
     # save y train and y test GT1 to GT7 dfs
-    # y_train_output_file = os.path.join(script_dir, f"{config['y_train_data_file']}_GT{i}.csv")
-    # y_test_output_file = os.path.join(script_dir, f"{config['y_test_data_file']}_GT{i}.csv")
+    y_train_output_file = os.path.join(script_dir, f"{config['y_train_data_file']}_GT{i}.csv")
+    y_test_output_file = os.path.join(script_dir, f"{config['y_test_data_file']}_GT{i}.csv")
     
-    y_train_output_file = os.path.join(script_dir, f"{config['y_train_data_86Hz_file']}_GT{i}.csv")
-    y_test_output_file = os.path.join(script_dir, f"{config['y_test_data_86Hz_file']}_GT{i}.csv")
+    # y_train_output_file = os.path.join(script_dir, f"{config['y_train_data_86Hz_file']}_GT{i}.csv") # put a generic name test for testing other parameters/stuff
+    # y_test_output_file = os.path.join(script_dir, f"{config['y_test_data_86Hz_file']}_GT{i}.csv")
     
     print(f" y train and test of GT{i} saved")
 
@@ -95,7 +99,7 @@ for i in range (1,8):
 
 ### feature importace z!!!
 
-### RANDOM FOREST:
+### RANDOM FOREST - FIND BEST PARAMS:
 
 # for i in range(1,8):
     
