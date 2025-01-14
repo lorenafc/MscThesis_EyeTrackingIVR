@@ -33,7 +33,6 @@ with open('config.json') as json_file:
 script_dir = config["script_dir"]  
 os.chdir(script_dir)  
 
-# path_file = os.path.join(script_dir, config["data_path"])
 
 preprocessed_et_data = pd.read_csv(config["preprocessed_data_file"])
 
@@ -42,8 +41,6 @@ preprocessed_et_data = pd.read_csv(config["preprocessed_data_file"])
 ####################################### VELOCITY AND ACCELERATION #################################################################
 ###################################################################################################################################
 
-
-
 # # add velocity to the eye tracking data - when I add this inside a function it keeps running forever.
 # eye_tracking_data_cm2deg_new = funcs.velocity(eye_tracking_data_cm2deg_new)
 
@@ -51,61 +48,194 @@ preprocessed_et_data = pd.read_csv(config["preprocessed_data_file"])
 # eye_tracking_data_cm2deg_new = funcs.acceleration(eye_tracking_data_cm2deg_new)
 
 
-# Velocity (◦/s) and acceleration (◦/s2) of the gaze points.
-# calculated using a Savitzky–Golay filter with polynomial
-# order 2 and a window size of 12 ms—half the duration of shortest saccade, as suggested by Nystrom ¨
-# and Holmqvist (2010)
+# Velocity (◦/s) and acceleration (◦/s2) of the gaze points. calculated using a Savitzky–Golay filter with polynomial
+# order 2 and a window size of 12 ms—half the duration of shortest saccade, as suggested by Nystrom ¨ and Holmqvist (2010)
 # SAVITZKY-GOLD filter: https://medium.com/pythoneers/introduction-to-the-savitzky-golay-filter-a-comprehensive-guide-using-python-b2dd07a8e2ce#:~:text=The%20Savitzky%2DGolay%20filter%20is,explained%20further%20in%20this%20post).
 
 
 #calculate velocity - when I add this inside a function it keeps running forever.
 preprocessed_et_data["velocity_deg_s"] = preprocessed_et_data['cm_to_deg_inside_VE']/preprocessed_et_data["time_diff"]
 preprocessed_et_data["acceler_deg_s"] = preprocessed_et_data['velocity_deg_s']/preprocessed_et_data["time_diff"]
-extracted_features = preprocessed_et_data
-
 
 
 ### feature importance !!!
 
 
+################################# MEAN DIFFF #########################################################################
+######################################################################################################################
 
-################################# MEAN DIFFF ###################################
-##################################################################################
 
-
-# 8 - mean-diff - Distance (◦) between the mean gaze position in a 
-# 100-ms window before the sample and a 100-ms window after the sample.
+# 3- mean-diff - Distance (◦) between the mean gaze position in a 100-ms window before the sample and a 100-ms window after the sample.
 # Pg. 15 Olsson 2007
 
 # Take the r number of points that are before the sample (so the interval are 100ms) and r points after 
 # take the average for both of them. measure the distance (in degrees). this is the mean-diff
 
-preprocessed_and_features = pd.read_csv(config["prepr_and_features_file"])
 
 xyzcxcycz = ['L_x', 'L_y', 'L_z','C_x', 'C_y', 'C_z']
-win_4_x_y_z_cx_cy_cz = funcs_prep.calculate_average_window(preprocessed_and_features, xyzcxcycz, window=4)
+win_4_x_y_z_cx_cy_cz = funcs_prep.calculate_average_window(preprocessed_et_data, xyzcxcycz, window=5) #changed from 4 to 5
 
 preproc_add_mean_dist_m = funcs_feat.calc_mean_dist_m(win_4_x_y_z_cx_cy_cz) # in meters, convert then to degrees. 
 
-
 # Convert MEAN-DIFF to degrees:
-
 preproc_add_mean_dist_m_view_dist = funcs_feat.apply_viewing_distance_df(preproc_add_mean_dist_m)
 preproc_add_mean_diff_degree = funcs_feat.mean_diff_degree_inside_VE(preproc_add_mean_dist_m_view_dist)
 
-output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
-preproc_add_mean_diff_degree.to_csv(output_file_features_GTs_updated, index=False)
 
-columns_to_keep = ['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg','GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
-only_vel_acc_mean_diff_and_GTs = preproc_add_mean_diff_degree[columns_to_keep]
+################# 4 DISPERSION - DEGREES ##############################
+##################################################################################
+
+# 4- disp - Dispersion (◦). Calculated as (xmax −xmin)+(ymax −ymin) over a 100-ms window. 
+
+
+preproc_add_disp_m = funcs_feat.calculate_dispersion_meters(preproc_add_mean_diff_degree,'L_x', 'L_y', 'L_z' )
+preproc_add_disp_degree = funcs_feat.convert_met_to_degree(preproc_add_disp_m, "disp_degree", 'dispersion_meters',"viewing_distance")
+
+
+
+
+#################################### 5 MED-DIFF ####################################
+##################################################################################
+
+
+# 5 - med-diff - Distance (◦) between the median gaze position in a 100-ms window before the sample and a 100-ms window after the sample.
+# Olsson, P. (2007). Real-time and offline filters for eye tracking. Master’s thesis, Royal Institute of Technology, Stockholm, Sweden
+
+
+
+preproc_add_disp_degree = pd.read_csv(config["prepr_and_features_file_updated"])
+
+
+xyzcxcycz = ['L_x', 'L_y', 'L_z','C_x', 'C_y', 'C_z']
+median_win5 = funcs_feat.calculate_median_window(preproc_add_disp_degree,xyzcxcycz, window=5)
+median_dist_m = funcs_feat.calc_median_dist_m(median_win5) #function below a bit slow to run
+
+#there is something wrong with calc_dist_function because viewing_dist values only increase.
+#I dont think it harm the results because it is a long distance and it only changes slightly. Diff between smalles and bigger is 40cm.
+
+view_dist_median_m = funcs_feat.apply_viewing_distance_df(median_dist_m, 'viewing_distance_median_wind', "L_x_Median_Before_Win5", "L_y_Median_Before_Win5", "L_z_Median_Before_Win5", "C_x_Median_Before_Win5" , "C_y_Median_Before_Win5", "C_z_Median_Before_Win5")
+median_deg = funcs_feat.convert_met_to_degree(view_dist_median_m,"med_diff_deg", 'median_dist_m' , 'viewing_distance_median_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
+
+
+
+
+
+# Create a simple dataset with 12 rows and 2 columns
+data = {
+    "Column1": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "Column2": [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+}
+
+# Convert to a DataFrame
+df = pd.DataFrame(data)
+
+# Columns to calculate the median for
+columns = ["Column1", "Column2"]
+
+# Apply the function to the dataset
+updated_df = calculate_median_window(df, columns, window=5)
+
+# Print the updated dataset
+print("\nUpdated Dataset:")
+print(updated_df)
+
+
+
+
+# Example DataFrame
+data2 = {'observer': [1, 2, 3, 4, 5, 6, 7.1, 8,9,10,11,12,13,14]}
+median_degTEST = pd.DataFrame(data2)
+
+# Identify rows where the observer value is a float and its decimal part is not 0
+rows_to_remove = median_degTEST[median_degTEST['observer'] % 1 != 0].index
+
+# Extend the range to include 5 rows before and 5 rows after
+extended_rows_to_remove = set()
+for idx in rows_to_remove:
+    extended_rows_to_remove.update(range(max(0, idx - 5), min(len(median_degTEST), idx + 6)))
+
+# Create a new DataFrame excluding these rows
+median_degTEST_no_float_zero = median_degTEST.drop(index=extended_rows_to_remove).reset_index(drop=True)
+
+print("Original DataFrame:")
+print(median_degTEST)
+print("\nFiltered DataFrame:")
+print(median_degTEST_no_float_zero)
+
+
+
+
+############################### 6 STD ###########################################
+##################################################################################
+
+# 6 - std - Standard deviation (◦) of the recorded gaze position in a 100-ms window centered on the sample.  (Holmqvist et al., 2011) # book 152 dollars
+
+
+preproc_5feat = pd.read_csv(config["prepr_and_features_file_updated"])
+
+preproc_5feat.columns
+
+columns_to_keep_5feat = ['L_x', 'L_y', 'L_z', 'C_x', 'C_y', 'C_z', 'viewing_distance',
+       'time_diff', 'coordinates_dist', 'cm_to_deg_inside_VE',
+       'observer', 'velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree", 
+       'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+preproc_5feat = median_deg[columns_to_keep_5feat]
+
+
+## debug increasing viewing_dist values
+
+## Remove NaN - function convert_met_to_degree remove NaN from col dist meters
+
+
+
+## Remove rows that observer is not an integer, and 5 rows before and after
+
+# Remove rows where the observer value is a float and its decimal part is not 0
+median_deg_no_float_observ = median_deg[median_deg['observer'] % 1 == 0] # example row 4031
+
+# Print the resulting dataframe
+print(preproc_merged_no_float_zero.head())
+
+
+# Reset the index (optional)
+preproc_merged_no_float_zero.reset_index(drop=True, inplace=True)
+
+
+### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
+output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
+median_deg.to_csv(output_file_features_GTs_updated, index=False)
+
+#### Save just features and GTs ## CHANGE DF NAME AND JSON CSV FILE!!
+columns_to_keep = ['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree", 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+only_until_5_med_diff_and_GTs = median_deg[columns_to_keep]
 
 output_file_features_GTs_TEST = os.path.join(script_dir, config["only_extracted_features_and_GTs_TEST_file"])
-only_vel_acc_mean_diff_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
+only_until_5_med_diff_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
 
 
-preprocessed_and_features.columns 
 
 
+
+
+############################### STD-DIFF ###########################################
+##################################################################################
+
+
+# 14 - std - diff Difference in standard deviation (◦) between two 100-ms windows, 
+# one before and one after the sample. Olsson (2007)
+
+# Olsson, P. (2007). Real-time and offline filters for eye tracking. Master’s thesis, Royal Institute of Technology, Stockholm, Sweden
+
+
+
+
+
+
+###############################  RMS-DIFF ###########################################
+##################################################################################
+
+###############################  BCEA  ###########################################
+##################################################################################
 
 # 3 - BCEA - Bivariate contour ellipse area (◦2). 
 # Measures the area in which the recorded gaze position lies 
@@ -116,40 +246,20 @@ preprocessed_and_features.columns
 # eye tracking research and applications, ETRA ’12, (pp. 289–292).
 # New York, NY, USA: ACM
 
+
+
+###############################  BCEA-DIFF  ###########################################
+##################################################################################
+
 # 4 - BCEA-DIFF Difference in bivariate contour ellipse area (◦2) 
 #between two 100ms windows, one before and one after the sample. Olsson (2007)
 
-# 5- disp - Dispersion (◦). Calculated as (xmax −xmin)+(ymax −ymin) 
-# over a 100-ms window. (Salvucci & Goldberg,
-# 2000).
-# Salvucci, D. D., & Goldberg, J. H. (2000). Identifying fixations and
-# saccades in eye-tracking protocols. In Proceedings of the 2000
-# symposium on eye tracking research & applications, ETRA ’00
-# (pp. 71–78).
 
-preproc_and_features_meandiff = pd.read_csv(config["prepr_and_features_file_updated"])
-
-
-preproc_add_disp_m = funcs_feat.calculate_dispersion_meters(preproc_and_features_meandiff,'L_x', 'L_y', 'L_z' )
-
-preproc_add_disp_degree = funcs_feat.convert_met_to_degree(preproc_add_disp_m, "disp_degree", 'dispersion_meters',"viewing_distance")
-
-
-### save full file preproc and feature extracted 
-output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
-preproc_add_disp_m.to_csv(output_file_features_GTs_updated, index=False)
-
-#### Save just features and GTs ## CHANGE DF NAME AND JSON CSV FILE!!
-columns_to_keep = ['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "disp_degree",  'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
-only_vel_acc_mean_diff_disp_and_GTs = preproc_add_disp_m[columns_to_keep]
-
-output_file_features_GTs_TEST = os.path.join(script_dir, config["only_extracted_features_and_GTs_TEST_file"])
-only_vel_acc_mean_diff_disp_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
 
 # 6 - fs - Sampling frequency (Hz). Mean sampling rate: 44.27 Hz  (SMI BeGaze)
 
 
-
+#### 7 is not possible because we cannot detectate saccades, Idont have this data
 # 7 - i2mc - A feature used to detect saccades in very noisy data. 
 # The final weights come from the two-means clustering procedure as 
 # per the original implementation by Hessels et al. (2016). 
@@ -159,13 +269,6 @@ only_vel_acc_mean_diff_disp_and_GTs.to_csv(output_file_features_GTs_TEST, index=
 # 1–22. doi:10.3758/s13428-016-0822-1
 
 
-
-
-
-# 9 - med-diff - Distance (◦) between the median gaze position in a 
-# 100-ms window before the sample and a 100-ms window after the sample.
-# Olsson (2007)
-# Olsson, P. (2007). Real-time and offline filters for eye tracking. Master’s thesis, Royal Institute of Technology, Stockholm, Sweden
 
 
 # 10 - Rayleightest - Tests whether the sample-to-sample directions in
@@ -194,21 +297,6 @@ only_vel_acc_mean_diff_disp_and_GTs.to_csv(output_file_features_GTs_TEST, index=
 # by taking the difference in the RMS, STD, and BCEA precision measures calculated for 100-ms windows preceding
 # and following the current sample. Obviously, the largest differences (and therefore peaks in the feature) should occur
 # around the onset and offset of the saccades.
-
-
-# 13 - std - Standard deviation (◦) of the recorded gaze position in a 
-# 100-ms window centered on the sample.  (Holmqvist et al., 2011) # book 152 dollars
-# Holmqvist, K., Andersson, R., Jarodzka, H., Kok, E., Nystrom, M., ¨
-# & Dewhurst, R. (2016). Eye tracking. A comprehensive guide to
-# methods and measures. Oxford: Oxford University Press
-
-
-
-# 14 - std - diff Difference in standard deviation (◦) between two 100-ms windows, 
-# one before and one after the sample. Olsson (2007)
-
-# Olsson, P. (2007). Real-time and offline filters for eye tracking. Master’s thesis, Royal Institute of Technology, Stockholm, Sweden
-
 
 
 

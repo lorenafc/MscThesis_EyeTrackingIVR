@@ -112,19 +112,21 @@ for i in range(1,8):
 # GT1 - Test Accuracy: 82.48%
 
 
-# using mean_diff degree original dataset:
+# using 3 mean_diff degree original dataset:
     
 # GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 85% - 1 - fixation, 81% 0 - undefined  
 # GT1 - Train Accuracy: 82.68%
 # GT1 - Test Accuracy: 82.89%
 
 
-# using disp degree original dataset:
+# using 4 disp degree original dataset:
     
-# GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 81% 0 - undefined  
+# GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 85% - 1 - fixation, 82% 0 - undefined  
 
+# add 5 med-diff 
+# GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 85% - 1 - fixation, 82% 0 - undefined  
 
-########
+#######################################
 
 # GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 76% - 1 - fixation, 79% 0 - undefined
 # GT2 - Train Accuracy: 76.71%
@@ -145,9 +147,12 @@ for i in range(1,8):
 
 # using disp degree original dataset:
     
-# GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 82% - 1 - fixation, 82% 0 - undefined  
+# GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 83% 0 - undefined  
 
-#######
+# add 5 med-diff 
+# GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 83% 0 - undefined  
+
+####################33
 # GT3 - {'max_depth': 6, 'n_estimators': 200} f1 = 81% - 1 - fixation, 74% 0 - undefined
 #GT3 - Train Accuracy: 76.78%
 #GT3 - Test Accuracy: 77.82%
@@ -165,7 +170,11 @@ for i in range(1,8):
 
 # using disp degree original dataset:
     
-# GT3 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 80% 0 - undefined  
+# GT3 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 81% 0 - undefined  
+
+# add 5 med-diff 
+# GT3 - {'max_depth': 6, 'n_estimators': 50} f1 = 81% - 1 - fixation, 84% 0 - undefined  
+
 
 ########
 
@@ -187,7 +196,10 @@ for i in range(1,8):
 
 # using disp degree original dataset:
     
-# GT4 - {'max_depth': 6, 'n_estimators': 50} f1 = 82% - 1 - fixation, 79% 0 - undefined  
+# GT4 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 80% 0 - undefined  
+
+# add 5 med-diff 
+# GT4 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 80% 0 - undefined  
 
 #######
 
@@ -209,9 +221,12 @@ for i in range(1,8):
 
 # using disp degree original dataset:
     
-# GT5 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 78% 0 - undefined 
+# GT5 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 79% 0 - undefined 
 
-####
+# add 5 med-diff 
+# GT5 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 79% 0 - undefined  
+
+#####################################
 
 # GT6 -{'max_depth': 6, 'n_estimators': 200} f1 = 81% - 1 - fixation, 70% 0 - undefined
 # GT6 - Train Accuracy: 76.16%
@@ -231,9 +246,12 @@ for i in range(1,8):
 
 # using disp degree original dataset:
     
-# GT6 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 77% 0 - undefined 
+# GT6 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 78% 0 - undefined 
 
-######
+# add 5 med-diff 
+# GT6 - {'max_depth': 6, 'n_estimators': 50} f1 = 85% - 1 - fixation, 78% 0 - undefined  
+
+#########################################
 
 
 
@@ -256,7 +274,11 @@ for i in range(1,8):
 
 # using disp degree original dataset:
     
-# GT7 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 77% 0 - undefined 
+# GT7 - {'max_depth': 6, 'n_estimators': 50} f1 = 82% - 1 - fixation, 80% 0 - undefined 
+
+
+# add 5 med-diff 
+# GT7 - {'max_depth': 6, 'n_estimators': 50} f1 = 82% - 1 - fixation, 80% 0 - undefined  
 
 
 # dataset original - 44Hz
@@ -264,7 +286,7 @@ from statistics import mean
 
 f1 = [82,76,81,80,80,81,78]
 average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 79.71 % joep  μsF1 0.753 - No extracted features
+print(round(average_f1_extracted_features,2),"%") # 79.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925
 
 
 # dataset interpolated- 86Hz
@@ -272,28 +294,38 @@ from statistics import mean
 
 f1 = [82,79,81,80,80,81,78]
 average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 80.14 % joep  μsF1 0.753  - No extracted features
+print(round(average_f1_extracted_features,2),"%") # 80.14 % joep  μsF1 0.753  - No extracted features, ST-DBSCAN 0.925
 
 # dataset original vel, acc and mean dist m:
     
 f1 = [84,82,84,82,83,84,81]
 average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 82.86 % joep  μsF1 0.753 - No extracted features 
+print(round(average_f1_extracted_features,2),"%") # 82.86 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925 
 
 # dataset original vel, acc and MEAN DIFF:
 from statistics import mean 
    
 f1 = [85,83,84,82,83,84,81]
 average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 83.14 % joep  μsF1 0.753 - No extracted features  
+print(round(average_f1_extracted_features,2),"%") # 83.14 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
 
 # dataset original vel, acc, MEAN DIFF and DISP deg: - ## F1 decreased when Disp degrees was included!
 from statistics import mean 
    
-f1 = [84,82,83,82,83,83,81]
+f1 = [85,84,84,83,84,84,82]
 average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 82.57 % joep  μsF1 0.753 - No extracted features  
+print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+
+
+
+# dataset original add 5 -MED-DIFF: - ## F1 decreased when Disp degrees was included!
+from statistics import mean 
+   
+f1 = [85,83,84,83,84,85,82]
+average_f1_extracted_features = mean(f1)
+print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+
 
 
 """ f1-score = 0.82 (1 fixation), 0.75 (0 no fixation)

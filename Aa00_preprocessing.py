@@ -37,6 +37,8 @@ import numpy as np
 
 # source: https://stackoverflow.com/questions/58427391/how-to-add-24-rows-under-each-row-in-python-pandas-dataframe 
 
+
+
 N = 1 # add 1 row - aprox 86 Hz:
     
 preproc_et.index = preproc_et.index * (N + 1)
@@ -71,11 +73,9 @@ print(preproc_merged.head())
 
 
     
-# Drop all rows where 'observer' is not an integer. 
+# Drop all rows where column 'observer' is not an integer. 
 
 preproc_merged_drop = preproc_merged.drop(columns=['coordinates', 'time_diff']) # create new columns time_diff because interval now is different
-
-preproc_merged_only_obs_int = preproc_merged_dropd.drop(preproc_merged_drop.index[[4031,3,5,7]]) 
 
 
 # Check the data type of the 'observer' column

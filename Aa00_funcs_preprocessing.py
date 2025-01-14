@@ -122,7 +122,7 @@ def process_eye_tracking_data(df):
 
 
 
-def calculate_average_window(df, columns, window=4): #win = 14 to be close to 100ms (approx 90ms)
+def calculate_average_window(df, columns, window=4): #win = for the other functions changed from 4 to 5 to be close to 100ms (approx 90ms)
 
     for column in columns:
         results = []

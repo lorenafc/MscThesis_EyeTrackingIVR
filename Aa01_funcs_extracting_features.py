@@ -27,6 +27,31 @@ import numpy as np
 ######### MEAN DIFF ##############
 
 
+def calculate_average_window(df, columns, window=4):  # win = for the others changed from 4 to 5 to be close to 100ms (approx 90ms)
+
+    for column in columns:
+        results = []
+        for row_index in range(len(df)):
+            # Get the range before and after the row
+            start_before = max(0, row_index - window)
+            end_after = min(len(df), row_index + window + 1)
+
+            # Samples before
+            samples_before = df[start_before:row_index]
+            avg_before = np.nanmean(samples_before[column]) if len(samples_before) > 0 else np.nan
+
+            # Samples after
+            samples_after = df[row_index + 1:end_after]
+            avg_after = np.nanmean(samples_after[column]) if len(samples_after) > 0 else np.nan
+
+            # Append the result as a tuple (avg_before, avg_after)
+            results.append((avg_before, avg_after))
+
+        # Add the results to the DataFrame
+        df[f'{column}_Avg_Before_Win{window}'] = [result[0] for result in results]
+        df[f'{column}_Avg_After_Win{window}'] = [result[1] for result in results]
+
+    return df
 
 
 def calc_mean_dist_m(df): # a bit slow to run
@@ -105,7 +130,7 @@ def calculate_dispersion_meters(df, x_column, y_column, z_column, window=5, cent
     df['dispersion_meters'] = (
         df[x_column].rolling(window, center=center).max() - df[x_column].rolling(window, center=center).min() +
         df[y_column].rolling(window, center=center).max() - df[y_column].rolling(window, center=center).min() 
-        +  df[z_column].rolling(window, center=center).max() - df[z_column].rolling(window, center=center).min()# 
+        +  df[z_column].rolling(window, center=center).max() - df[z_column].rolling(window, center=center).min() 
        
     )
     
@@ -153,3 +178,59 @@ def convert_met_to_degree(df, df_new_col_deg, col_dist_meters, col_view_dist): #
     df[df_new_col_deg] = df[df_new_col_deg].round(4)
         
     return df
+
+
+
+####### MED-DIFF
+
+
+def calculate_median_window(df, columns, window=5): #win = changed from 4 to 5 to be close to 100ms (approx 90ms)
+
+    for column in columns:
+        results = []
+        for row_index in range(len(df)):
+            # Get the range before and after the row
+            start_before = max(0, row_index - window)
+            end_after = min(len(df), row_index + window + 1)
+
+            # Samples before
+            samples_before = df[start_before:row_index]
+            median_before = np.nanmedian(samples_before[column]) if len(samples_before) > 0 else np.nan 
+
+            # Samples after
+            samples_after = df[row_index + 1:end_after]
+            median_after = np.nanmedian(samples_after[column]) if len(samples_after) > 0 else np.nan 
+
+            # Append the result as a tuple (avg_before, avg_after) #replaced average by median
+            results.append((median_before, median_after))
+
+        # Add the results to the DataFrame
+        df[f'{column}_Median_Before_Win{window}'] = [result[0] for result in results]
+        df[f'{column}_Median_After_Win{window}'] = [result[1] for result in results]
+
+    return df
+
+def calc_median_dist_m(df, window=5): # a bit slow to run
+    
+    if "median_dist_m" not in df.columns:
+        df["median_dist_m"] = ""
+        
+    for gaze in range(1, len(df)):
+        
+        x, y, z  = df.iloc[gaze][f"L_x_Median_After_Win{window}"], df.iloc[gaze][f"L_y_Median_After_Win{window}"], df.iloc[gaze][f"L_z_Median_After_Win{window}"]
+        prev_x, prev_y, prev_z = df.iloc[gaze][f"L_x_Median_Before_Win{window}"], df.iloc[gaze][f"L_y_Median_Before_Win{window}"], df.iloc[gaze][f"L_z_Median_Before_Win{window}"]
+    
+        sqr_dist_x = (x - prev_x)**2
+        sqr_dist_y = (y - prev_y)**2
+        sqr_dist_z = (z - prev_z)**2
+
+        sum_square_distances = sqr_dist_x + sqr_dist_y + sqr_dist_z
+        median_distance_meters = round(math.sqrt(sum_square_distances), 4) 
+       
+        df.at[gaze,'median_dist_m'] = median_distance_meters   
+        df['median_dist_m'] = pd.to_numeric(df['median_dist_m'], errors='coerce')
+      
+    return df    
+
+# apply_viewing_distance_df
+#  convert_met_to_degree
