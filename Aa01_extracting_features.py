@@ -61,7 +61,7 @@ preprocessed_et_data["acceler_deg_s"] = preprocessed_et_data['velocity_deg_s']/p
 ### feature importance !!!
 
 
-################################# MEAN DIFFF #########################################################################
+################################# 3 MEAN DIFFF #########################################################################
 ######################################################################################################################
 
 
@@ -82,8 +82,8 @@ preproc_add_mean_dist_m_view_dist = funcs_feat.apply_viewing_distance_df(preproc
 preproc_add_mean_diff_degree = funcs_feat.mean_diff_degree_inside_VE(preproc_add_mean_dist_m_view_dist)
 
 
-################# 4 DISPERSION - DEGREES ##############################
-##################################################################################
+######################################################### 4 DISPERSION - DEGREES ##############################
+################################################################################################################
 
 # 4- disp - Dispersion (◦). Calculated as (xmax −xmin)+(ymax −ymin) over a 100-ms window. 
 
@@ -171,15 +171,37 @@ print(median_degTEST_no_float_zero)
 # 6 - std - Standard deviation (◦) of the recorded gaze position in a 100-ms window centered on the sample.  (Holmqvist et al., 2011) # book 152 dollars
 
 
-preproc_5feat = pd.read_csv(config["prepr_and_features_file_updated"])
+median_deg = pd.read_csv(config["prepr_and_features_file_updated"])
 
-preproc_5feat.columns
+
+#clean dataset
 
 columns_to_keep_5feat = ['L_x', 'L_y', 'L_z', 'C_x', 'C_y', 'C_z', 'viewing_distance',
        'time_diff', 'coordinates_dist', 'cm_to_deg_inside_VE',
        'observer', 'velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree", 
        'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+
 preproc_5feat = median_deg[columns_to_keep_5feat]
+
+
+std_m = funcs_feat.calculate_std_meters_win(preproc_5feat,"L_x", "L_y", "L_z", window=5)
+view_dist_std_m = funcs_feat.apply_viewing_distance_df(std_m, 'viewing_distance_std_wind', "L_x", "L_y", "L_z",'C_x','C_y','C_z')
+std_deg = funcs_feat.convert_met_to_degree(view_dist_std_m,"std_deg", 'std_total_meters' , 'viewing_distance_std_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
+
+
+
+### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
+output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
+std_deg.to_csv(output_file_features_GTs_updated, index=False)
+
+#### Save just features and GTs ## CHANGE DF NAME AND JSON CSV FILE!!
+columns_to_keep = ['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree", "std_deg", 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+only_until_6_std_and_GTs = std_deg[columns_to_keep]
+
+output_file_features_GTs_TEST = os.path.join(script_dir, config["only_extracted_features_and_GTs_TEST_file"])
+only_until_6_std_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
+
+
 
 
 ## debug increasing viewing_dist values

@@ -126,6 +126,8 @@ for i in range(1,8):
 # add 5 med-diff 
 # GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 85% - 1 - fixation, 82% 0 - undefined  
 
+# add 6 STD 
+# GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 85% - 1 - fixation, 82% 0 - undefined  
 #######################################
 
 # GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 76% - 1 - fixation, 79% 0 - undefined
@@ -152,6 +154,9 @@ for i in range(1,8):
 # add 5 med-diff 
 # GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 83% 0 - undefined  
 
+# add 6 STD 
+# GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 83% 0 - undefined  
+
 ####################33
 # GT3 - {'max_depth': 6, 'n_estimators': 200} f1 = 81% - 1 - fixation, 74% 0 - undefined
 #GT3 - Train Accuracy: 76.78%
@@ -173,7 +178,10 @@ for i in range(1,8):
 # GT3 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 81% 0 - undefined  
 
 # add 5 med-diff 
-# GT3 - {'max_depth': 6, 'n_estimators': 50} f1 = 81% - 1 - fixation, 84% 0 - undefined  
+# GT3 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 81% 0 - undefined  
+
+# add 6 STD 
+# GT3 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 81% 0 - undefined  
 
 
 ########
@@ -201,6 +209,9 @@ for i in range(1,8):
 # add 5 med-diff 
 # GT4 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 80% 0 - undefined  
 
+# add 6 STD 
+# GT4 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 80% 0 - undefined  
+
 #######
 
 # GT5 -{'max_depth': 6, 'n_estimators': 200} f1 = 80% - 1 - fixation, 71% 0 - undefined
@@ -224,6 +235,9 @@ for i in range(1,8):
 # GT5 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 79% 0 - undefined 
 
 # add 5 med-diff 
+# GT5 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 79% 0 - undefined  
+
+# add 6 STD 
 # GT5 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 79% 0 - undefined  
 
 #####################################
@@ -250,6 +264,9 @@ for i in range(1,8):
 
 # add 5 med-diff 
 # GT6 - {'max_depth': 6, 'n_estimators': 50} f1 = 85% - 1 - fixation, 78% 0 - undefined  
+
+# add 6 STD 
+# GT6 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 78% 0 - undefined  
 
 #########################################
 
@@ -280,6 +297,9 @@ for i in range(1,8):
 # add 5 med-diff 
 # GT7 - {'max_depth': 6, 'n_estimators': 50} f1 = 82% - 1 - fixation, 80% 0 - undefined  
 
+# add 6 STD 
+# GT7 - {'max_depth': 6, 'n_estimators': 50} f1 = 82% - 1 - fixation, 80% 0 - undefined  
+
 
 # dataset original - 44Hz
 from statistics import mean 
@@ -302,7 +322,7 @@ f1 = [84,82,84,82,83,84,81]
 average_f1_extracted_features = mean(f1)
 print(round(average_f1_extracted_features,2),"%") # 82.86 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925 
 
-# dataset original vel, acc and MEAN DIFF:
+# dataset original vel, acc and 3 MEAN DIFF:
 from statistics import mean 
    
 f1 = [85,83,84,82,83,84,81]
@@ -310,7 +330,7 @@ average_f1_extracted_features = mean(f1)
 print(round(average_f1_extracted_features,2),"%") # 83.14 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
 
-# dataset original vel, acc, MEAN DIFF and DISP deg: - ## F1 decreased when Disp degrees was included!
+# dataset original vel, acc, 3 MEAN DIFF and 4 DISP deg: - ## F1 decreased when Disp degrees was included!
 from statistics import mean 
    
 f1 = [85,84,84,83,84,84,82]
@@ -323,6 +343,14 @@ print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - 
 from statistics import mean 
    
 f1 = [85,83,84,83,84,85,82]
+average_f1_extracted_features = mean(f1)
+print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+
+
+# dataset original add 6 - STD: - ## F1 decreased when Disp degrees was included!
+from statistics import mean 
+   
+f1 = [85,84,84,83,84,84,82]
 average_f1_extracted_features = mean(f1)
 print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 

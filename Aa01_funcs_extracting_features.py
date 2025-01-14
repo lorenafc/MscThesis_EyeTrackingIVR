@@ -92,6 +92,14 @@ def apply_viewing_distance_df(df): # calculate only viewing dist before to use i
     
     if "viewing_distance_avg_wind" not in df.columns:
         df["viewing_distance_avg_wind"] = ""
+        
+#try the vectorized approach below instead of the for loop with iterrows.
+#     df["viewing_distance_avg_wind"] = np.sqrt(
+#     (df["C_x_Avg_Before_Win4"] - df["L_x_Avg_Before_Win4"])**2 +
+#     (df["C_y_Avg_Before_Win4"] - df["L_y_Avg_Before_Win4"])**2 +
+#     (df["C_z_Avg_Before_Win4"] - df["L_z_Avg_Before_Win4"])**2
+# ).round(4)
+
     
     for gaze, row in df.iterrows():
         viewing_distance = calc_viewing_distance(row["L_x_Avg_Before_Win4"], row["L_y_Avg_Before_Win4"],row["L_z_Avg_Before_Win4"], row["C_x_Avg_Before_Win4"],row["C_y_Avg_Before_Win4"], row["C_z_Avg_Before_Win4"])    
@@ -181,7 +189,7 @@ def convert_met_to_degree(df, df_new_col_deg, col_dist_meters, col_view_dist): #
 
 
 
-####### MED-DIFF
+############## MED-DIFF #####################
 
 
 def calculate_median_window(df, columns, window=5): #win = changed from 4 to 5 to be close to 100ms (approx 90ms)
@@ -234,3 +242,27 @@ def calc_median_dist_m(df, window=5): # a bit slow to run
 
 # apply_viewing_distance_df
 #  convert_met_to_degree
+
+############################### 6 STD ###########################################
+
+
+# Function to calculate rolling standard deviations
+def calculate_std_meters_win(df, x_column, y_column, z_column, window=5, center=True):
+    
+    df['std_x_meters'] = df[x_column].rolling(window, center=center).std()
+    df['std_y_meters'] = df[y_column].rolling(window, center=center).std()
+    df['std_z_meters'] = df[z_column].rolling(window, center=center).std()
+    
+        # Calculate the total standard deviation (Euclidean norm of std components)
+    df['std_total_meters'] = (
+        df['std_x_meters']**2 + df['std_y_meters']**2 + df['std_z_meters']**2
+    )**0.5
+        
+    return df
+
+
+# apply_viewing_distance_df
+#  convert_met_to_degree
+
+###########################################################################3
+
