@@ -158,6 +158,10 @@ for i in range(1,8):
 # add 6 STD 
 # GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 83% 0 - undefined  
 
+
+# add 9 RMS, RMS-DIFF, STD-DIFF 
+# GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 83% 0 - undefined  
+
 ####################33
 # GT3 - {'max_depth': 6, 'n_estimators': 200} f1 = 81% - 1 - fixation, 74% 0 - undefined
 #GT3 - Train Accuracy: 76.78%
@@ -355,7 +359,12 @@ f1 = [85,84,84,83,84,84,82]
 average_f1_extracted_features = mean(f1)
 print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
-
+# dataset original add 9 - RMS: - ## !
+from statistics import mean 
+   
+f1 = [86,84,85,84,85,85,83]
+average_f1_extracted_features = mean(f1)
+print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
 """ f1-score = 0.82 (1 fixation), 0.75 (0 no fixation)
 

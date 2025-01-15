@@ -298,8 +298,6 @@ columns_to_move = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
 # Reorder the DataFrame
 rms_diff_deg = rms_diff_deg[[col for col in rms_diff_deg.columns if col not in columns_to_move] + columns_to_move]
 
-# Check the updated DataFrame
-print(rms_diff_deg.columns)
 
 
 ### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
@@ -321,10 +319,30 @@ only_until_8_rms_diff_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
 
 rms_m = funcs_feat.calculate_rms_meters_win(rms_diff_deg,"L_x", "L_y", "L_z", window=5)
 view_dist_rms_m = funcs_feat.apply_viewing_distance_df(rms_m, 'viewing_distance_rms_wind', "L_x", "L_y", "L_z",'C_x','C_y','C_z')
-rms_deg = funcs_feat.convert_met_to_degree(view_dist_std_m,"rms_deg", 'rms_total_meters' , 'viewing_distance_rms_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
+rms_deg = funcs_feat.convert_met_to_degree(view_dist_rms_m,"rms_deg", 'rms_total_meters' , 'viewing_distance_rms_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
 
+rms_deg = rms_deg.drop(columns=['rms_x_meters', 'rms_y_meters',
+'rms_z_meters', 'rms_total_meters', 'viewing_distance_rms_wind'])
+                       
+# Select the columns to move to the end
+columns_to_move = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
 
+# Reorder the DataFrame
+rms_deg = rms_deg[[col for col in rms_deg.columns if col not in columns_to_move] + columns_to_move]
 
+                   
+### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
+output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
+rms_deg.to_csv(output_file_features_GTs_updated, index=False)
+
+#### Save just features and GTs ## CHANGE DF NAME AND JSON CSV FILE!!
+columns_to_keep = ['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree",  "std_deg", 'std_diff_deg', 'rms_deg', 'rms_diff_deg','GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+only_until_9_rms_and_GTs = rms_deg[columns_to_keep] # CHANGE DF NAME- HERE!
+
+output_file_features_GTs_TEST = os.path.join(script_dir, config["only_extracted_features_and_GTs_TEST_file"])
+only_until_9_rms_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
+                      
+  
 ############################### 10  BCEA  ###########################################
 ##################################################################################
 
