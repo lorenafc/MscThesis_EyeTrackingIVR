@@ -190,33 +190,13 @@ std_deg = funcs_feat.convert_met_to_degree(view_dist_std_m,"std_deg", 'std_total
 
 
 
-### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
-output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
-std_deg.to_csv(output_file_features_GTs_updated, index=False)
-
-#### Save just features and GTs ## CHANGE DF NAME AND JSON CSV FILE!!
-columns_to_keep = ['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree", "std_deg", 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
-only_until_6_std_and_GTs = std_deg[columns_to_keep]
-
-output_file_features_GTs_TEST = os.path.join(script_dir, config["only_extracted_features_and_GTs_TEST_file"])
-only_until_6_std_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
-
-
-
 
 ## debug increasing viewing_dist values
-
 ## Remove NaN - function convert_met_to_degree remove NaN from col dist meters
-
-
-
 ## Remove rows that observer is not an integer, and 5 rows before and after
 
 # Remove rows where the observer value is a float and its decimal part is not 0
 median_deg_no_float_observ = median_deg[median_deg['observer'] % 1 == 0] # example row 4031
-
-# Print the resulting dataframe
-print(preproc_merged_no_float_zero.head())
 
 
 # Reset the index (optional)
@@ -239,7 +219,7 @@ only_until_5_med_diff_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
 
 
 
-############################### STD-DIFF ###########################################
+############################### 7 STD-DIFF ###########################################
 ##################################################################################
 
 
@@ -249,14 +229,103 @@ only_until_5_med_diff_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
 # Olsson, P. (2007). Real-time and offline filters for eye tracking. Master’s thesis, Royal Institute of Technology, Stockholm, Sweden
 
 
+std_deg = pd.read_csv(config["prepr_and_features_file_updated"])
+
+xyzcxcycz = ['L_x', 'L_y', 'L_z','C_x', 'C_y', 'C_z']
+std_wind = funcs_feat.calculate_std_window(std_deg, xyzcxcycz, window = 5)
 
 
+std_dist_wind_m = funcs_feat.calc_std_wind_dist_m(std_wind) #vectorized
 
 
-###############################  RMS-DIFF ###########################################
+#there is something wrong with calc_dist_function because viewing_dist values only increase.
+#I dont think it harm the results because it is a long distance and it only changes slightly. Diff between smalles and bigger is 40cm.
+
+view_dist_std_m = funcs_feat.apply_viewing_distance_df(std_dist_wind_m, 'viewing_distance_std_wind', "L_x_Std_Before_Win5", "L_y_Std_Before_Win5", "L_z_Std_Before_Win5", "C_x_Std_Before_Win5" , "C_y_Std_Before_Win5", "C_z_Std_Before_Win5") #(df, df_new_col, lx_col, ly_col, lz_col, cx_col, cy_col, cz_col)
+std_diff_deg = funcs_feat.convert_met_to_degree(view_dist_std_m,"std_diff_deg", 'std_wind_dist_m' , 'viewing_distance_std_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
+std_diff_deg = std_deg.drop(index=0).reset_index(drop=True)
+
+std_diff_deg = std_diff_deg.drop(columns=['L_x_Std_Before_Win5',
+'L_x_Std_After_Win5', 'L_y_Std_Before_Win5', 'L_y_Std_After_Win5',
+'L_z_Std_Before_Win5', 'L_z_Std_After_Win5', 'C_x_Std_Before_Win5',
+'C_x_Std_After_Win5', 'C_y_Std_Before_Win5', 'C_y_Std_After_Win5',
+'C_z_Std_Before_Win5', 'C_z_Std_After_Win5', 'std_wind_dist_m'])
+
+std_diff_deg = std_diff_deg.drop(columns=['std_x_meters', 'std_y_meters', 'std_z_meters', 'std_total_meters'])
+
+std_diff_deg = std_diff_deg.drop(columns=['viewing_distance_std_wind'])
+ 
+### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
+output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
+std_diff_deg.to_csv(output_file_features_GTs_updated, index=False)
+
+
+ 
+############################### 8 RMS-DIFF ###########################################
 ##################################################################################
 
-###############################  BCEA  ###########################################
+std_diff_deg = pd.read_csv(config["prepr_and_features_file_updated"])
+
+xyzcxcycz = ['L_x', 'L_y', 'L_z','C_x', 'C_y', 'C_z']
+rms_wind = funcs_feat.calculate_rms_window(std_diff_deg, xyzcxcycz, window = 5) # a bit slow to run
+ 
+# calc_feature_wind_dist_m(df, new_col_feature_dist_m, x_col_feature_bef_wind, x_col_feature_aft_wind, y_col_feature_bef_wind, y_col_feature_aft_wind, z_col_feature_bef_wind, z_col_feature_aft_wind):
+rms_dist_wind_m = funcs_feat.calc_feature_wind_dist_m(rms_wind, 'rms_wind_dist_m','L_x_Rms_Before_Win5','L_x_Rms_After_Win5','L_y_Rms_Before_Win5', 'L_y_Rms_After_Win5','L_z_Rms_Before_Win5', 'L_z_Rms_After_Win5' ) #vectorized #calc_feature_wind_dist_m(df, new_col_feature_dist_m, x_col_feature_bef_wind, x_col_feature_aft_wind, y_col_feature_bef_wind, y_col_feature_aft_wind, z_col_feature_bef_wind, z_col_feature_aft_wind) 
+
+
+#there is something wrong with calc_dist_function because viewing_dist values only increase.
+#I dont think it harm the results because it is a long distance and it only changes slightly. Diff between smalles and bigger is 40cm.
+
+view_dist_rms_m = funcs_feat.apply_viewing_distance_df(rms_dist_wind_m, 'viewing_distance_rms_wind', "L_x_Rms_Before_Win5", "L_y_Rms_Before_Win5", "L_z_Rms_Before_Win5", "C_x_Rms_Before_Win5" , "C_y_Rms_Before_Win5", "C_z_Rms_Before_Win5") #(df, df_new_col, lx_col, ly_col, lz_col, cx_col, cy_col, cz_col)
+rms_diff_deg = funcs_feat.convert_met_to_degree(view_dist_rms_m,"rms_diff_deg", 'rms_wind_dist_m' , 'viewing_distance_rms_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
+# rms_diff_deg = rms_deg.drop(index=0).reset_index(drop=True)
+
+rms_diff_deg = rms_diff_deg.drop(columns=[
+    'viewing_distance_rms_wind',
+    'L_x_Rms_Before_Win5', 'L_x_Rms_After_Win5',
+    'L_y_Rms_Before_Win5', 'L_y_Rms_After_Win5',
+    'L_z_Rms_Before_Win5', 'L_z_Rms_After_Win5',
+    'C_x_Rms_Before_Win5', 'C_x_Rms_After_Win5',
+    'C_y_Rms_Before_Win5', 'C_y_Rms_After_Win5',
+    'C_z_Rms_Before_Win5', 'C_z_Rms_After_Win5',
+    'rms_wind_dist_m','std_wind_dist_m'
+])
+
+
+# Select the columns to move to the end
+columns_to_move = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+
+# Reorder the DataFrame
+rms_diff_deg = rms_diff_deg[[col for col in rms_diff_deg.columns if col not in columns_to_move] + columns_to_move]
+
+# Check the updated DataFrame
+print(rms_diff_deg.columns)
+
+
+### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
+output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
+rms_diff_deg.to_csv(output_file_features_GTs_updated, index=False)
+
+#### Save just features and GTs ## CHANGE DF NAME AND JSON CSV FILE!!
+columns_to_keep = ['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree",  "std_deg", 'std_diff_deg', 'rms_diff_deg','GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+only_until_8_rms_diff_and_GTs = rms_diff_deg[columns_to_keep] # CHANGE DF NAME- HERE!
+
+output_file_features_GTs_TEST = os.path.join(script_dir, config["only_extracted_features_and_GTs_TEST_file"])
+only_until_8_rms_diff_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
+
+
+
+############################### 9 RMS ###########################################
+##################################################################################
+
+
+rms_m = funcs_feat.calculate_rms_meters_win(rms_diff_deg,"L_x", "L_y", "L_z", window=5)
+view_dist_rms_m = funcs_feat.apply_viewing_distance_df(rms_m, 'viewing_distance_rms_wind', "L_x", "L_y", "L_z",'C_x','C_y','C_z')
+rms_deg = funcs_feat.convert_met_to_degree(view_dist_std_m,"rms_deg", 'rms_total_meters' , 'viewing_distance_rms_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
+
+
+
+############################### 10  BCEA  ###########################################
 ##################################################################################
 
 # 3 - BCEA - Bivariate contour ellipse area (◦2). 
@@ -270,7 +339,7 @@ only_until_5_med_diff_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
 
 
 
-###############################  BCEA-DIFF  ###########################################
+############################### 11 BCEA-DIFF  ###########################################
 ##################################################################################
 
 # 4 - BCEA-DIFF Difference in bivariate contour ellipse area (◦2) 

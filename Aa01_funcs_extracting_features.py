@@ -209,7 +209,7 @@ def calculate_median_window(df, columns, window=5): #win = changed from 4 to 5 t
             samples_after = df[row_index + 1:end_after]
             median_after = np.nanmedian(samples_after[column]) if len(samples_after) > 0 else np.nan 
 
-            # Append the result as a tuple (avg_before, avg_after) #replaced average by median
+            # Append the result as a tuple 
             results.append((median_before, median_after))
 
         # Add the results to the DataFrame
@@ -264,5 +264,108 @@ def calculate_std_meters_win(df, x_column, y_column, z_column, window=5, center=
 # apply_viewing_distance_df
 #  convert_met_to_degree
 
-###########################################################################3
+############################## 7 STD - DIFF ############################################
 
+
+def calculate_std_window(df, columns, window=5):
+    for column in columns:
+        results = []
+        for row_index in range(len(df)):
+            # Get the range before and after the row
+            start_before = max(0, row_index - window)
+            end_after = min(len(df), row_index + window + 1)
+
+            # Samples before
+            samples_before = df[start_before:row_index]
+            std_before = np.nanstd(samples_before[column]) if len(samples_before) > 0 else np.nan 
+
+            # Samples after
+            samples_after = df[row_index + 1:end_after]
+            std_after = np.nanstd(samples_after[column]) if len(samples_after) > 0 else np.nan 
+
+            # Append the result as a tuple
+            results.append((std_before, std_after))
+
+        # Add the results to the DataFrame
+        df[f'{column}_Std_Before_Win{window}'] = [result[0] for result in results]
+        df[f'{column}_Std_After_Win{window}'] = [result[1] for result in results]
+
+    return df
+
+
+def calc_std_wind_dist_m(df):  #its the calc_dist_m finction vectorized
+    
+    if "std_wind_dist_m" not in df.columns:
+        df["std_wind_dist_m"] = ""
+        
+    df['std_wind_dist_m'] = round(
+        ((df["L_x_Std_After_Win5"]-df["L_x_Std_Before_Win5"])**2 +  (df["L_y_Std_After_Win5"]-df["L_y_Std_Before_Win5"])**2 +  (df["L_z_Std_After_Win5"]-df["L_z_Std_Before_Win5"])**2
+    )**0.5,4)
+           
+    return df
+
+
+def calc_feature_wind_dist_m(df, new_col_feature_dist_m, x_col_feature_bef_wind, x_col_feature_aft_wind, y_col_feature_bef_wind, y_col_feature_aft_wind, z_col_feature_bef_wind, z_col_feature_aft_wind):  # its a generic function for every column name
+    
+    if new_col_feature_dist_m not in df.columns:
+        df[new_col_feature_dist_m] = ""
+        
+    df[new_col_feature_dist_m] = (
+        (df[x_col_feature_aft_wind]-df[x_col_feature_bef_wind])**2 +  (df[y_col_feature_aft_wind]-df[y_col_feature_bef_wind])**2 +  (df[z_col_feature_aft_wind]-df[z_col_feature_bef_wind])**2
+    )**0.5
+           
+    return df 
+
+# apply_viewing_distance_df
+#  convert_met_to_degree
+
+############################## 8 RMS - DIFF ############################################
+
+
+def calculate_rms_window(df, columns, window=5): # a bit slow to run
+    for column in columns:
+        results = []
+        for row_index in range(len(df)):
+            # Get the range before and after the row
+            start_before = max(0, row_index - window)
+            end_after = min(len(df), row_index + window + 1)
+
+            # Samples before
+            samples_before = df[start_before:row_index]
+            rms_before = np.sqrt(np.nanmean(samples_before[column]**2)) if len(samples_before) > 0 else np.nan 
+
+            # Samples after
+            samples_after = df[row_index + 1:end_after]
+            rms_after = np.sqrt(np.nanmean(samples_after[column]**2)) if len(samples_after) > 0 else np.nan 
+
+            # Append the result as a tuple
+            results.append((rms_before, rms_after))
+
+        # Add the results to the DataFrame
+        df[f'{column}_Rms_Before_Win{window}'] = [result[0] for result in results]
+        df[f'{column}_Rms_After_Win{window}'] = [result[1] for result in results]
+
+    return df
+
+
+############################### 9 RMS ###########################################
+
+
+def calculate_rms_meters_win(df, x_column, y_column, z_column, window=5, center=True):
+
+    df['rms_x_meters'] = df[x_column].rolling(window, center=center).apply(
+        lambda x: np.sqrt(np.nanmean(x**2)), raw=True
+    )
+    df['rms_y_meters'] = df[y_column].rolling(window, center=center).apply(
+        lambda x: np.sqrt(np.nanmean(x**2)), raw=True
+    )
+    df['rms_z_meters'] = df[z_column].rolling(window, center=center).apply(
+        lambda x: np.sqrt(np.nanmean(x**2)), raw=True
+    )
+    
+
+    df['rms_total_meters'] = (
+        df['rms_x_meters']**2 + df['rms_y_meters']**2 + df['rms_z_meters']**2
+    )**0.5
+
+    return df

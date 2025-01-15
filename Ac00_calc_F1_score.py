@@ -88,7 +88,8 @@ for i in range(1,8):
     print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
     
     
-    
+## Calculate RMS
+
     #####################
 
 # using 2 features only - velocity and acceleration:
@@ -105,7 +106,7 @@ for i in range(1,8):
 # GT1 - Train Accuracy: 79.48%
 # GT1 - Test Accuracy: 78.96%
 
-# including mean_dist_m inthe original dataset:
+# including mean_dist_m in the original dataset:
 
 # GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 77% 0 - undefined    
 # GT1 - Train Accuracy: 82.36%
