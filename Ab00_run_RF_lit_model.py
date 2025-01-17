@@ -94,14 +94,14 @@ for i in range (1,8):
     y_GT_test.to_csv(y_test_output_file, index=False)
     
     #convert in numpy 1D arrays for RF model
-    y_train_dict[i] = y_GT_train.values #.ravel()
-    y_test_dict[i] = y_GT_test.values#.ravel()
+    y_train_dict[i] = y_GT_train.values.ravel() #.ravel() # if dont add ravel(), this message appears: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+    y_test_dict[i] = y_GT_test.values.ravel()#.ravel()
     
 
 
 ### feature importace z!!!
 
-### RANDOM FOREST - FIND BEST PARAMS:
+## RANDOM FOREST - FIND BEST PARAMS:
 
 # for i in range(1,8):
     
@@ -121,20 +121,25 @@ for i in range (1,8):
 
   
     
-    # best_params = CV_rfc.best_params_
+#     best_params = CV_rfc.best_params_
     
-    # rf = RandomForestClassifier(n_estimators=best_params['n_estimators'], max_depth=best_params['max_depth'], n_jobs=-1) # replave by params.json instead of best params #GT1  max dep 6, n est 50.
-    # rf.fit(X_train, y_train)
+#     rf = RandomForestClassifier(n_estimators=best_params['n_estimators'], max_depth=best_params['max_depth'], n_jobs=-1) # replave by params.json instead of best params #GT1  max dep 6, n est 50.
+#     rf.fit(X_train, y_train)
     
-    # train_accuracy = rf.score(X_train, y_train)
-    # test_accuracy = rf.score(X_test, y_test)
-    # print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
-    # print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
+#     train_accuracy = rf.score(X_train, y_train)
+#     test_accuracy = rf.score(X_test, y_test)
+#     print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
+#     print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
     
-    # y_pred = rf.predict(X_test)
-    # print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
-    # print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
+#     y_pred = rf.predict(X_test)
+#     print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
+#     print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
     
+
+
+
+
+
 
 
 

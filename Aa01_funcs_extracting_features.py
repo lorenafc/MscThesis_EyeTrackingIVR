@@ -8,6 +8,7 @@ Created on Tue Oct 29 2024
 import math
 import pandas as pd
 import numpy as np
+from scipy.stats import pearsonr
 
 ######## VELOCITY AND ACCELERATION ##########
 
@@ -369,3 +370,54 @@ def calculate_rms_meters_win(df, x_column, y_column, z_column, window=5, center=
     )**0.5
 
     return df
+
+############################### 10 BCEA #################################################
+
+
+
+
+def calculate_bcea_m_win(df, dim1, dim2, k=1, window=5):
+
+    std_x = df[dim1].rolling(window, center=True).std()
+    std_y = df[dim2].rolling(window, center=True).std()
+    
+    # Pearson correlation
+    def rolling_corr(x, y):
+        return np.corrcoef(x, y)[0, 1]
+
+    corr = df[dim1].rolling(window, center=True).apply(
+        lambda x: rolling_corr(x, df[dim2][x.index]), raw=False
+    )
+
+    # BCEA formula
+    bcea = 2 * k * np.pi * std_x * std_y * np.sqrt(1 - corr**2)
+    return bcea
+
+
+
+def calculate_3d_bcea_rolling(df, x_col, y_col, z_col, k=1, window=5):
+
+    def calculate_rolling_corr(column1, column2, window):
+        """Calculate rolling Pearson correlation."""
+        return column1.rolling(window, center=True).apply(
+            lambda x: pearsonr(x, column2[x.index])[0] if len(x.dropna()) > 1 else np.nan, raw=False
+        )
+
+    # Rolling standard deviations
+    std_x = df[x_col].rolling(window, center=True).std()
+    std_y = df[y_col].rolling(window, center=True).std()
+    std_z = df[z_col].rolling(window, center=True).std()
+
+    # Rolling correlations
+    rho_xy = calculate_rolling_corr(df[x_col], df[y_col], window)
+    rho_yz = calculate_rolling_corr(df[y_col], df[z_col], window)
+    rho_zx = calculate_rolling_corr(df[z_col], df[x_col], window)
+
+    # BCEA formula for each rolling window
+    df["bcea_volume"] = (
+        (4 / 3) * k * np.pi * std_x * std_y * std_z *
+        np.sqrt(1 - rho_xy**2 - rho_yz**2 - rho_zx**2 + 2 * rho_xy * rho_yz * rho_zx)
+    )
+
+    return df
+

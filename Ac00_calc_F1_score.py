@@ -12,7 +12,7 @@ import os
 import json
 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, precision_score, recall_score, f1_score, mean_squared_error
 
 # import Aa01_funcs_extracting_features_C_gitignore as funcs
 
@@ -62,7 +62,9 @@ for i in range(1, 8):
     print(f"GT{i} y_train shape:", y_train_dict[i].shape)
     print(f"GT{i} y_test shape:", y_test_dict[i].shape)
 
-
+results_df = pd.DataFrame(columns=[
+    "GT", "Train Accuracy", "Test Accuracy", "Precision", "Recall", "F1", "RMS"
+])
 
 # calculate F1:
     
@@ -86,6 +88,41 @@ for i in range(1,8):
     y_pred = rf.predict(X_test)
     print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
     print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
+    
+    
+    
+    # Classification metrics
+    precision = precision_score(y_true=y_test, y_pred=y_pred, zero_division=0)
+    recall = recall_score(y_true=y_test, y_pred=y_pred, zero_division=0)
+    f1 = f1_score(y_true=y_test, y_pred=y_pred, zero_division=0)
+
+    rms = mean_squared_error(y_test, y_pred, squared=False)
+
+    # Append metrics to DataFrame
+    results_df = results_df.append({
+        "GT": f"GT{i}",
+        "Train Accuracy": train_accuracy * 100,
+        "Test Accuracy": test_accuracy * 100,
+        "Precision": precision * 100,
+        "Recall": recall * 100,
+        "F1": f1 * 100,
+        "RMS": rms
+    }, ignore_index=True)
+
+    print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
+    print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
+    print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
+    print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
+
+# Calculate average metrics across all GTs
+average_metrics = results_df.mean(numeric_only=True)
+print("\nAverage Metrics Across All GTs:")
+print(average_metrics)
+
+
+results_csv_path = f"{config['results_csv']}.csv"   
+results_df.to_csv(results_csv_path, index=False)
+print(f"Results saved to {results_csv_path}")
     
     
 ## Calculate RMS
@@ -129,6 +166,10 @@ for i in range(1,8):
 
 # add 6 STD 
 # GT1 - {'max_depth': 6, 'n_estimators': 50} f1 = 85% - 1 - fixation, 82% 0 - undefined  
+
+# add 9 RMS, RMS-DIFF, STD-DIFF 
+# G1 - {'max_depth': 6, 'n_estimators': 50} f1 = 86% - 1 - fixation, 83% 0 - undefined  
+
 #######################################
 
 # GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 76% - 1 - fixation, 79% 0 - undefined
@@ -160,9 +201,10 @@ for i in range(1,8):
 
 
 # add 9 RMS, RMS-DIFF, STD-DIFF 
-# GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 83% 0 - undefined  
+# GT2 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 84% 0 - undefined  
 
-####################33
+####################
+
 # GT3 - {'max_depth': 6, 'n_estimators': 200} f1 = 81% - 1 - fixation, 74% 0 - undefined
 #GT3 - Train Accuracy: 76.78%
 #GT3 - Test Accuracy: 77.82%
@@ -187,6 +229,9 @@ for i in range(1,8):
 
 # add 6 STD 
 # GT3 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 81% 0 - undefined  
+
+# add 9 RMS, RMS-DIFF, STD-DIFF 
+# GT3 - {'max_depth': 6, 'n_estimators': 50} f1 = 85% - 1 - fixation, 82% 0 - undefined  
 
 
 ########
@@ -217,6 +262,11 @@ for i in range(1,8):
 # add 6 STD 
 # GT4 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 80% 0 - undefined  
 
+# add 9 RMS, RMS-DIFF, STD-DIFF 
+# GT4 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 81% 0 - undefined  
+
+
+
 #######
 
 # GT5 -{'max_depth': 6, 'n_estimators': 200} f1 = 80% - 1 - fixation, 71% 0 - undefined
@@ -245,6 +295,10 @@ for i in range(1,8):
 # add 6 STD 
 # GT5 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 79% 0 - undefined  
 
+# add 9 RMS, RMS-DIFF, STD-DIFF 
+# GT5 - {'max_depth': 6, 'n_estimators': 50} f1 = 85% - 1 - fixation, 80% 0 - undefined  
+
+
 #####################################
 
 # GT6 -{'max_depth': 6, 'n_estimators': 200} f1 = 81% - 1 - fixation, 70% 0 - undefined
@@ -272,6 +326,11 @@ for i in range(1,8):
 
 # add 6 STD 
 # GT6 - {'max_depth': 6, 'n_estimators': 50} f1 = 84% - 1 - fixation, 78% 0 - undefined  
+
+# add 9 RMS, RMS-DIFF, STD-DIFF 
+# GT6 - {'max_depth': 6, 'n_estimators': 50} f1 = 85% - 1 - fixation, 80% 0 - undefined  
+
+
 
 #########################################
 
@@ -304,6 +363,10 @@ for i in range(1,8):
 
 # add 6 STD 
 # GT7 - {'max_depth': 6, 'n_estimators': 50} f1 = 82% - 1 - fixation, 80% 0 - undefined  
+
+# add 9 RMS, RMS-DIFF, STD-DIFF 
+# GT7 - {'max_depth': 6, 'n_estimators': 50} f1 = 83% - 1 - fixation, 81% 0 - undefined  
+
 
 
 # dataset original - 44Hz

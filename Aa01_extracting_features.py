@@ -117,54 +117,6 @@ view_dist_median_m = funcs_feat.apply_viewing_distance_df(median_dist_m, 'viewin
 median_deg = funcs_feat.convert_met_to_degree(view_dist_median_m,"med_diff_deg", 'median_dist_m' , 'viewing_distance_median_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
 
 
-
-
-
-# Create a simple dataset with 12 rows and 2 columns
-data = {
-    "Column1": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-    "Column2": [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
-}
-
-# Convert to a DataFrame
-df = pd.DataFrame(data)
-
-# Columns to calculate the median for
-columns = ["Column1", "Column2"]
-
-# Apply the function to the dataset
-updated_df = calculate_median_window(df, columns, window=5)
-
-# Print the updated dataset
-print("\nUpdated Dataset:")
-print(updated_df)
-
-
-
-
-# Example DataFrame
-data2 = {'observer': [1, 2, 3, 4, 5, 6, 7.1, 8,9,10,11,12,13,14]}
-median_degTEST = pd.DataFrame(data2)
-
-# Identify rows where the observer value is a float and its decimal part is not 0
-rows_to_remove = median_degTEST[median_degTEST['observer'] % 1 != 0].index
-
-# Extend the range to include 5 rows before and 5 rows after
-extended_rows_to_remove = set()
-for idx in rows_to_remove:
-    extended_rows_to_remove.update(range(max(0, idx - 5), min(len(median_degTEST), idx + 6)))
-
-# Create a new DataFrame excluding these rows
-median_degTEST_no_float_zero = median_degTEST.drop(index=extended_rows_to_remove).reset_index(drop=True)
-
-print("Original DataFrame:")
-print(median_degTEST)
-print("\nFiltered DataFrame:")
-print(median_degTEST_no_float_zero)
-
-
-
-
 ############################### 6 STD ###########################################
 ##################################################################################
 
@@ -173,50 +125,9 @@ print(median_degTEST_no_float_zero)
 
 median_deg = pd.read_csv(config["prepr_and_features_file_updated"])
 
-
-#clean dataset
-
-columns_to_keep_5feat = ['L_x', 'L_y', 'L_z', 'C_x', 'C_y', 'C_z', 'viewing_distance',
-       'time_diff', 'coordinates_dist', 'cm_to_deg_inside_VE',
-       'observer', 'velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree", 
-       'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
-
-preproc_5feat = median_deg[columns_to_keep_5feat]
-
-
-std_m = funcs_feat.calculate_std_meters_win(preproc_5feat,"L_x", "L_y", "L_z", window=5)
+std_m = funcs_feat.calculate_std_meters_win(median_deg,"L_x", "L_y", "L_z", window=5)
 view_dist_std_m = funcs_feat.apply_viewing_distance_df(std_m, 'viewing_distance_std_wind', "L_x", "L_y", "L_z",'C_x','C_y','C_z')
 std_deg = funcs_feat.convert_met_to_degree(view_dist_std_m,"std_deg", 'std_total_meters' , 'viewing_distance_std_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
-
-
-
-
-## debug increasing viewing_dist values
-## Remove NaN - function convert_met_to_degree remove NaN from col dist meters
-## Remove rows that observer is not an integer, and 5 rows before and after
-
-# Remove rows where the observer value is a float and its decimal part is not 0
-median_deg_no_float_observ = median_deg[median_deg['observer'] % 1 == 0] # example row 4031
-
-
-# Reset the index (optional)
-preproc_merged_no_float_zero.reset_index(drop=True, inplace=True)
-
-
-### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
-output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
-median_deg.to_csv(output_file_features_GTs_updated, index=False)
-
-#### Save just features and GTs ## CHANGE DF NAME AND JSON CSV FILE!!
-columns_to_keep = ['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree", 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
-only_until_5_med_diff_and_GTs = median_deg[columns_to_keep]
-
-output_file_features_GTs_TEST = os.path.join(script_dir, config["only_extracted_features_and_GTs_TEST_file"])
-only_until_5_med_diff_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
-
-
-
-
 
 
 ############################### 7 STD-DIFF ###########################################
@@ -233,16 +144,14 @@ std_deg = pd.read_csv(config["prepr_and_features_file_updated"])
 
 xyzcxcycz = ['L_x', 'L_y', 'L_z','C_x', 'C_y', 'C_z']
 std_wind = funcs_feat.calculate_std_window(std_deg, xyzcxcycz, window = 5)
-
-
 std_dist_wind_m = funcs_feat.calc_std_wind_dist_m(std_wind) #vectorized
-
 
 #there is something wrong with calc_dist_function because viewing_dist values only increase.
 #I dont think it harm the results because it is a long distance and it only changes slightly. Diff between smalles and bigger is 40cm.
 
 view_dist_std_m = funcs_feat.apply_viewing_distance_df(std_dist_wind_m, 'viewing_distance_std_wind', "L_x_Std_Before_Win5", "L_y_Std_Before_Win5", "L_z_Std_Before_Win5", "C_x_Std_Before_Win5" , "C_y_Std_Before_Win5", "C_z_Std_Before_Win5") #(df, df_new_col, lx_col, ly_col, lz_col, cx_col, cy_col, cz_col)
 std_diff_deg = funcs_feat.convert_met_to_degree(view_dist_std_m,"std_diff_deg", 'std_wind_dist_m' , 'viewing_distance_std_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
+
 std_diff_deg = std_deg.drop(index=0).reset_index(drop=True)
 
 std_diff_deg = std_diff_deg.drop(columns=['L_x_Std_Before_Win5',
@@ -251,27 +160,20 @@ std_diff_deg = std_diff_deg.drop(columns=['L_x_Std_Before_Win5',
 'C_x_Std_After_Win5', 'C_y_Std_Before_Win5', 'C_y_Std_After_Win5',
 'C_z_Std_Before_Win5', 'C_z_Std_After_Win5', 'std_wind_dist_m'])
 
-std_diff_deg = std_diff_deg.drop(columns=['std_x_meters', 'std_y_meters', 'std_z_meters', 'std_total_meters'])
-
-std_diff_deg = std_diff_deg.drop(columns=['viewing_distance_std_wind'])
- 
-### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
-output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
-std_diff_deg.to_csv(output_file_features_GTs_updated, index=False)
-
 
  
 ############################### 8 RMS-DIFF ###########################################
 ##################################################################################
 
+#rms-diff - Difference in root mean square (◦) between two 100-ms 
+# windows before and after the sample. Olsson (2007)
+# Olsson, P. (2007). Real-time and offline filters for eye tracking. Master’s thesis, Royal Institute of Technology, Stockholm, Sweden
+
 std_diff_deg = pd.read_csv(config["prepr_and_features_file_updated"])
 
 xyzcxcycz = ['L_x', 'L_y', 'L_z','C_x', 'C_y', 'C_z']
 rms_wind = funcs_feat.calculate_rms_window(std_diff_deg, xyzcxcycz, window = 5) # a bit slow to run
- 
-# calc_feature_wind_dist_m(df, new_col_feature_dist_m, x_col_feature_bef_wind, x_col_feature_aft_wind, y_col_feature_bef_wind, y_col_feature_aft_wind, z_col_feature_bef_wind, z_col_feature_aft_wind):
 rms_dist_wind_m = funcs_feat.calc_feature_wind_dist_m(rms_wind, 'rms_wind_dist_m','L_x_Rms_Before_Win5','L_x_Rms_After_Win5','L_y_Rms_Before_Win5', 'L_y_Rms_After_Win5','L_z_Rms_Before_Win5', 'L_z_Rms_After_Win5' ) #vectorized #calc_feature_wind_dist_m(df, new_col_feature_dist_m, x_col_feature_bef_wind, x_col_feature_aft_wind, y_col_feature_bef_wind, y_col_feature_aft_wind, z_col_feature_bef_wind, z_col_feature_aft_wind) 
-
 
 #there is something wrong with calc_dist_function because viewing_dist values only increase.
 #I dont think it harm the results because it is a long distance and it only changes slightly. Diff between smalles and bigger is 40cm.
@@ -288,7 +190,7 @@ rms_diff_deg = rms_diff_deg.drop(columns=[
     'C_x_Rms_Before_Win5', 'C_x_Rms_After_Win5',
     'C_y_Rms_Before_Win5', 'C_y_Rms_After_Win5',
     'C_z_Rms_Before_Win5', 'C_z_Rms_After_Win5',
-    'rms_wind_dist_m','std_wind_dist_m'
+    'rms_wind_dist_m','rms_wind_dist_m'
 ])
 
 
@@ -300,22 +202,18 @@ rms_diff_deg = rms_diff_deg[[col for col in rms_diff_deg.columns if col not in c
 
 
 
-### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
-output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
-rms_diff_deg.to_csv(output_file_features_GTs_updated, index=False)
-
-#### Save just features and GTs ## CHANGE DF NAME AND JSON CSV FILE!!
-columns_to_keep = ['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree",  "std_deg", 'std_diff_deg', 'rms_diff_deg','GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
-only_until_8_rms_diff_and_GTs = rms_diff_deg[columns_to_keep] # CHANGE DF NAME- HERE!
-
-output_file_features_GTs_TEST = os.path.join(script_dir, config["only_extracted_features_and_GTs_TEST_file"])
-only_until_8_rms_diff_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
-
-
-
 ############################### 9 RMS ###########################################
 ##################################################################################
 
+#zemblys 2017:
+# Next to these,
+# we also propose several new features, which we hypothesize are likely to be useful for the detection of the onset and offset
+# of saccades: rms-diff, std-diff and bcea-diff. These new features are inspired by Olsson (2007) and are calculated
+# by taking the difference in the RMS, STD, and BCEA precision measures calculated for 100-ms windows preceding
+# and following the current sample. Obviously, the largest differences (and therefore peaks in the feature) should occur
+# around the onset and offset of the saccades.
+
+# Root mean square (◦) of the sample-to-sample displacement in a 100-ms window centered on a sample.  
 
 rms_m = funcs_feat.calculate_rms_meters_win(rms_diff_deg,"L_x", "L_y", "L_z", window=5)
 view_dist_rms_m = funcs_feat.apply_viewing_distance_df(rms_m, 'viewing_distance_rms_wind', "L_x", "L_y", "L_z",'C_x','C_y','C_z')
@@ -346,7 +244,7 @@ only_until_9_rms_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
 ############################### 10  BCEA  ###########################################
 ##################################################################################
 
-# 3 - BCEA - Bivariate contour ellipse area (◦2). 
+# 10 - BCEA - Bivariate contour ellipse area (◦2). 
 # Measures the area in which the recorded gaze position lies 
 # within a 100-ms window in (P %) of the time. (Blignaut and Beelders, 2012)
 
@@ -355,15 +253,56 @@ only_until_9_rms_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
 # eye tracking research and applications, ETRA ’12, (pp. 289–292).
 # New York, NY, USA: ACM
 
+# The bivariate contour ellipse (BCEA) is similar to CEP but it
+# acknowledges that the geometrical shape of fixations might be
+# elliptic. For a given proportion of samples,
+ #  P = 1 -e**(-k)., k determines the proportion of samples to include in the covered area.
+# If, for example, k=1, P = 63.2%. BCEA is then defined
+# as 2 * k*  PI() * stdx * stdy * (1-p^2)**1/2 
+
+#  where sx and sy denote the standard deviations in the x and y directions respectively and p is the
+# Pearson correlation coefficient between the samples' x and y coordinates [Crossland and Rubin, 2002].
+# The area of an ellipse can be expressed as A = PI()* a* b where a is  one half of the major diameter and b is one half of the minor
+# diameter. Therefore, the following equality holds for an ellipse that includes 63.2% of the samples: 
+    # ab = 2 *stdx *stdy * (1-p^2)**1/2 
+
+
+
+
+rms_deg = pd.read_csv(config["prepr_and_features_file_updated"])
+
+bcea_xy_m = funcs_feat.calculate_bcea_m_win(rms_deg,"L_x", "L_y", k=1, window=5) # 2D data #(df, dim1, dim2, k=1, window=5)
+
+bcea_yz_m = funcs_feat.calculate_bcea_m_win(rms_deg,"L_y", "L_z", k=1, window=5) # 2D data
+
+bcea_zx_m = funcs_feat.calculate_bcea_m_win(rms_deg,"L_z", "L_x", k=1, window=5)# 2D data
+
+bcea_volume = funcs_feat.calculate_3d_bcea_rolling(rms_deg, "L_x", "L_y", "L_z", k=1, window=5) # 3D data (using x, y and z at the same time)
+
+view_dist_bcea_m = funcs_feat.apply_viewing_distance_df(rms_m, 'viewing_distance_bcea_vol_wind', "L_x", "L_y", "L_z",'C_x','C_y','C_z')
+rms_deg = funcs_feat.convert_met_to_degree(view_dist_rms_m,"bcea_vol_deg", 'bcea_vol_total_meters' , 'viewing_distance_bcea_vol_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
+
+rms_deg = rms_deg.drop(columns=['rms_x_meters', 'rms_y_meters',
+'rms_z_meters', 'rms_total_meters', 'viewing_distance_rms_wind'])
+                       
+# Select the columns to move to the end
+columns_to_move = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+
+# Reorder the DataFrame
+rms_deg = rms_deg[[col for col in rms_deg.columns if col not in columns_to_move] + columns_to_move]
+
+
 
 
 ############################### 11 BCEA-DIFF  ###########################################
 ##################################################################################
 
-# 4 - BCEA-DIFF Difference in bivariate contour ellipse area (◦2) 
+# BCEA-DIFF Difference in bivariate contour ellipse area (◦2) 
 #between two 100ms windows, one before and one after the sample. Olsson (2007)
 
 
+
+######################
 
 # 6 - fs - Sampling frequency (Hz). Mean sampling rate: 44.27 Hz  (SMI BeGaze)
 
@@ -388,26 +327,37 @@ only_until_9_rms_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
 # 2484–2493.
 
 
-# 11 - rms - Root mean square (◦) of the sample-to-sample displacement in a 
-# 100-ms window centered on a sample.  (Holmqvist et al., 2011) # book 152 dollars
-# Holmqvist, K., Andersson, R., Jarodzka, H., Kok, E., Nystrom, M., ¨
-# & Dewhurst, R. (2016). Eye tracking. A comprehensive guide to
-# methods and measures. Oxford: Oxford University Press
-
-
-# 12 - rms-diff - Difference in root mean square (◦) between two 100-ms 
-# windows before and after the sample. Olsson (2007)
-# Olsson, P. (2007). Real-time and offline filters for eye tracking. Master’s thesis, Royal Institute of Technology, Stockholm, Sweden
-
-#zemblys 2017:
-# Next to these,
-# we also propose several new features, which we hypothesize are likely to be useful for the detection of the onset and offset
-# of saccades: rms-diff, std-diff and bcea-diff. These new features are inspired by Olsson (2007) and are calculated
-# by taking the difference in the RMS, STD, and BCEA precision measures calculated for 100-ms windows preceding
-# and following the current sample. Obviously, the largest differences (and therefore peaks in the feature) should occur
-# around the onset and offset of the saccades.
 
 
 
 
+
+# Example DataFrame
+data2 = {'observer': [1, 2, 3, 4, 5, 6, 7.1, 8,9,10,11,12,13,14]}
+median_degTEST = pd.DataFrame(data2)
+
+# Identify rows where the observer value is a float and its decimal part is not 0
+rows_to_remove = median_degTEST[median_degTEST['observer'] % 1 != 0].index
+
+# Extend the range to include 5 rows before and 5 rows after
+extended_rows_to_remove = set()
+for idx in rows_to_remove:
+    extended_rows_to_remove.update(range(max(0, idx - 5), min(len(median_degTEST), idx + 6)))
+
+# Create a new DataFrame excluding these rows
+median_degTEST_no_float_zero = median_degTEST.drop(index=extended_rows_to_remove).reset_index(drop=True)
+
+print("Original DataFrame:")
+print(median_degTEST)
+print("\nFiltered DataFrame:")
+print(median_degTEST_no_float_zero)
+
+
+# clean columns not used for other features and save data:
+    
+
+ 
+### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
+output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated"])
+std_diff_deg.to_csv(output_file_features_GTs_updated, index=False)
 
