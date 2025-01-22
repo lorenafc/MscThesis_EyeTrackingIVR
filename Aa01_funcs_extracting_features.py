@@ -314,6 +314,8 @@ def calculate_std_window(df, columns, window=5):
     return df
 
 
+
+
 def calc_std_wind_dist_m(df):  #its the calc_dist_m finction vectorized
     
     if "std_wind_dist_m" not in df.columns:
@@ -417,81 +419,6 @@ def calculate_bcea2d_m_win_corrcoef(df, dim1, dim2, k=1, window=5):
         
     return df
 
-# def calculate_3d_bcea_rolling(df, x_col, y_col, z_col, k=1, window=5):
-
-#     def calculate_rolling_corr(column1, column2, window):
-#         """Calculate rolling Pearson correlation."""
-#         return column1.rolling(window, center=True).apply(
-#             lambda x: pearsonr(x, column2[x.index])[0] if len(x.dropna()) > 1 else np.nan, raw=False
-#         )
-
-#     # Rolling standard deviations
-#     std_x = df[x_col].rolling(window, center=True).std()
-#     std_y = df[y_col].rolling(window, center=True).std()
-#     std_z = df[z_col].rolling(window, center=True).std()
-
-#     # Rolling correlations
-#     rho_xy = calculate_rolling_corr(df[x_col], df[y_col], window)
-#     rho_yz = calculate_rolling_corr(df[y_col], df[z_col], window)
-#     rho_zx = calculate_rolling_corr(df[z_col], df[x_col], window)
-
-#     # BCEA formula for each rolling window
-#     df["bcea_volume"] = (
-#         (4 / 3) * k * np.pi * std_x * std_y * std_z *
-#         np.sqrt(1 - rho_xy**2 - rho_yz**2 - rho_zx**2 + 2 * rho_xy * rho_yz * rho_zx)
-#     )
-
-#     return df
-
-
-
-
-# import numpy as np
-# import pandas as pd
-
-# # Function to calculate rolling standard deviations
-# def calculate_std_meters_win(df, x_column, y_column, z_column, window=5, center=True):
-#     df['std_x_meters'] = df[x_column].rolling(window, center=center).std()
-#     df['std_y_meters'] = df[y_column].rolling(window, center=center).std()
-#     df['std_z_meters'] = df[z_column].rolling(window, center=center).std()
-
-#     # Calculate the total standard deviation (Euclidean norm of std components)
-#     df['std_total_meters'] = (
-#         df['std_x_meters']**2 + df['std_y_meters']**2 + df['std_z_meters']**2
-#     )**0.5
-
-#     return df
-
-
-# def calculate_bcea_m_win(df, dim1, dim2, k=1, window=5):
-#     # Calculate rolling means
-#     mean_x = df[dim1].rolling(window, center=True).mean()
-#     mean_y = df[dim2].rolling(window, center=True).mean()
-
-#     # Calculate rolling covariance
-#     cov_xy = (
-#         df[dim1].rolling(window, center=True).apply(lambda x: np.nanmean((x - mean_x.loc[x.index]) * (df[dim2][x.index] - mean_y.loc[x.index])), raw=False)
-#     )
-
-#     # Use `calculate_std_meters_win` for rolling standard deviations
-#     df = calculate_std_meters_win(df, dim1, dim2, z_column=None, window=window)
-
-#     # Extract std_x and std_y from the DataFrame
-#     std_x = df['std_x_meters']
-#     std_y = df['std_y_meters']
-
-#     # Calculate Pearson correlation
-#     corr = cov_xy / (std_x * std_y)
-
-#     # BCEA formula
-#     bcea = 2 * k * np.pi * std_x * std_y * np.sqrt(1 - corr**2)
-
-#     # Replace NaN values with 0
-#     bcea = bcea.fillna(0)
-
-#     return bcea
-
-
 
 # Function to calculate rolling standard deviations
 def calculate_std_meters_win(df, dim_columns, std_columns, window=5, center=True):
@@ -556,3 +483,38 @@ def calculate_bcea2d_m_win_cov(df, dim1, dim2, k=1, window=5):
         
     return df
 
+######################################## BCEA DIFF #######################################
+
+def calculate_bcea_window(df, dim1, dim2, k=1, window=5):
+    results_before = []
+    results_after = []
+    
+    for row_index in range(len(df)):
+ 
+        start_before = max(0, row_index - window)
+        end_after = min(len(df), row_index + window + 1)
+        
+
+        samples_before = df[start_before:row_index]
+        std_x_before = np.nanstd(samples_before[dim1]) 
+        std_y_before = np.nanstd(samples_before[dim2]) 
+        corr_before = np.corrcoef(samples_before[dim1], samples_before[dim2])[0, 1] 
+        corr_before = np.nan_to_num(corr_before, nan=0.0)
+        bcea_before = 2 * k * np.pi * std_x_before * std_y_before * np.sqrt(1 - corr_before**2)
+        
+        samples_after = df[row_index + 1:end_after]
+        std_x_after = np.nanstd(samples_after[dim1]) 
+        std_y_after = np.nanstd(samples_after[dim2]) 
+        corr_after = np.corrcoef(samples_after[dim1], samples_after[dim2])[0, 1] 
+        corr_after = np.nan_to_num(corr_after, nan=0.0)
+        bcea_after = 2 * k * np.pi * std_x_after * std_y_after * np.sqrt(1 - corr_after**2)
+
+        # Store the results
+        results_before.append(bcea_before)
+        results_after.append(bcea_after)
+
+    # Add results as new columns to the DataFrame
+    df[f'bcea_{dim1}{dim2}_Before_Win{window}'] = np.nan_to_num(results_before, nan=0.0)
+    df[f'bcea_{dim1}{dim2}_After_Win{window}'] = np.nan_to_num(results_after, nan=0.0)
+    
+    return df

@@ -63,8 +63,18 @@ for i in range(1, 8):
     print(f"GT{i} y_test shape:", y_test_dict[i].shape)
 
 results_df = pd.DataFrame(columns=[
-    "GT", "Train Accuracy", "Test Accuracy", "Precision", "Recall", "F1", "RMS"
+    "GT", "n_estimators", "max_depth" "Train Accuracy", "Test Accuracy", "Precision", "Recall", "F1", "RMS"
 ])
+
+GTs=[]
+precisions = []
+recalls = []
+f1s = []
+rmss=[]
+
+trains_accuracy=[]
+tests_accuracy = []
+
 
 # calculate F1:
     
@@ -80,49 +90,74 @@ for i in range(1,8):
     rf = RandomForestClassifier(n_estimators=n_estimators, max_depth = max_depth, n_jobs=-1) 
     rf.fit(X_train, y_train)
     
-    train_accuracy = rf.score(X_train, y_train)
-    test_accuracy = rf.score(X_test, y_test)
+    train_accuracy = round(rf.score(X_train, y_train),4)
+    test_accuracy = round(rf.score(X_test, y_test), 4)
     print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
     print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
     
     y_pred = rf.predict(X_test)
     print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
     print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
+  
     
+    # Classification metrics - 
+
+    precision = round(precision_score(y_true=y_test, y_pred=y_pred, zero_division=0),4)
+    recall = round(recall_score(y_true=y_test, y_pred=y_pred, zero_division=0),4)
+    f1 = round(f1_score(y_true=y_test, y_pred=y_pred, zero_division=0),4)
+    rms = round(mean_squared_error(y_test, y_pred, squared=False),4)
     
+    # Append metrics to the results DataFrame
+    # Create a dictionary for the row data
+    results_row = {
+        "GT": f"GT{i}",
+        "n_estimators": n_estimators,
+        "max_depth": max_depth,
+        "Train Accuracy": train_accuracy,
+        "Test Accuracy": test_accuracy,
+        "Precision": precision,
+        "Recall": recall,
+        "F1": f1,
+        "RMS": rms
+    }
     
-#     # Classification metrics
-#     precision = precision_score(y_true=y_test, y_pred=y_pred, zero_division=0)
-#     recall = recall_score(y_true=y_test, y_pred=y_pred, zero_division=0)
-#     f1 = f1_score(y_true=y_test, y_pred=y_pred, zero_division=0)
+    # Convert the dictionary to a DataFrame and concatenate
+    results_df = pd.concat([results_df, pd.DataFrame([results_row])], ignore_index=True)
 
-#     rms = mean_squared_error(y_test, y_pred, squared=False)
-
-#     # Append metrics to DataFrame
-#     results_df = results_df.append({
-#         "GT": f"GT{i}",
-#         "Train Accuracy": train_accuracy * 100,
-#         "Test Accuracy": test_accuracy * 100,
-#         "Precision": precision * 100,
-#         "Recall": recall * 100,
-#         "F1": f1 * 100,
-#         "RMS": rms
-#     }, ignore_index=True)
-
-#     print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
-#     print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
-#     print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
-#     print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
-
-# # Calculate average metrics across all GTs
-# average_metrics = results_df.mean(numeric_only=True)
-# print("\nAverage Metrics Across All GTs:")
-# print(average_metrics)
+    
+    # # Print metrics for each GT
+    # print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
+    # print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
+    # print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
+    # print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
 
 
-# results_csv_path = f"{config['results_csv']}.csv"   
-# results_df.to_csv(results_csv_path, index=False)
-# print(f"Results saved to {results_csv_path}")
+# Calculate average metrics across all GTs
+average_metrics = results_df.mean(numeric_only=True)
+print("\nAverage Metrics Across All GTs:")
+print(average_metrics)
+average_results_csv_path = "data/train_test_data/prAc00_average_results.csv"   
+results_df.to_csv(results_csv_path, index=False)
+print(f"Results saved to {average_results_csv_path}")
+
+results_csv_path = f"{config['results_csv']}.csv"   
+results_df.to_csv(results_csv_path, index=False)
+print(f"Results saved to {results_csv_path}")
+    
+
+# # metrics per GT
+# results_appended = {"n_estimators": n_estimators, "max_depth": max_depth,
+#                "GT": GTs, "Train Accuracy": trains_accuracy, "Test Accuracy": tests_accuracy, "Precision":precisions, "Recall": recalls, "F1": f1s, "RMS":rmss}
+
+# results_appended = pd.DataFrame(results_appended, index=[0])
+
+# df_rf_val = pd.concat([results_df, results_appended], ignore_index=True)
+
+# # 
+# df_rf_val.to_csv("data/Ac00_classification_metrics_all_GTs_RF.csv", index=False)   
+
+
+
     
     
 ## Calculate RMS

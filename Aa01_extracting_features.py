@@ -182,7 +182,8 @@ view_dist_rms_m = funcs_feat.apply_viewing_distance_df(rms_dist_wind_m, 'viewing
 rms_diff_deg = funcs_feat.convert_met_to_degree(view_dist_rms_m,"rms_diff_deg", 'rms_wind_dist_m' , 'viewing_distance_rms_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
 # rms_diff_deg = rms_deg.drop(index=0).reset_index(drop=True)
 
-rms_diff_deg = rms_diff_deg.drop(columns=[
+
+columns_to_drop = [
     'viewing_distance_rms_wind',
     'L_x_Rms_Before_Win5', 'L_x_Rms_After_Win5',
     'L_y_Rms_Before_Win5', 'L_y_Rms_After_Win5',
@@ -190,15 +191,10 @@ rms_diff_deg = rms_diff_deg.drop(columns=[
     'C_x_Rms_Before_Win5', 'C_x_Rms_After_Win5',
     'C_y_Rms_Before_Win5', 'C_y_Rms_After_Win5',
     'C_z_Rms_Before_Win5', 'C_z_Rms_After_Win5',
-    'rms_wind_dist_m','rms_wind_dist_m'
-])
+    'rms_wind_dist_m', 'rms_wind_dist_m'
+]
 
-
-# Select the columns to move to the end
-columns_to_move = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
-
-# Reorder the DataFrame
-rms_diff_deg = rms_diff_deg[[col for col in rms_diff_deg.columns if col not in columns_to_move] + columns_to_move]
+rms_diff_deg = drop_and_reorder_columns(rms_diff_deg, columns_to_drop)
 
 
 
@@ -296,45 +292,6 @@ print(f'The number of non-NaN values in the L_x column is: {non_nan_count}')
 
 # bcea_volume = funcs_feat.calculate_3d_bcea_rolling(rms_deg, "L_x", "L_y", "L_z", k=1, window=5) # 3D data (using x, y and z at the same time)
 
-view_dist_bcea_m = funcs_feat.apply_viewing_distance_df(rms_m, 'viewing_distance_bcea_vol_wind', "L_x", "L_y", "L_z",'C_x','C_y','C_z')
-rms_deg = funcs_feat.convert_met_to_degree(view_dist_rms_m,"bcea_vol_deg", 'bcea_vol_total_meters' , 'viewing_distance_bcea_vol_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
-
-rms_deg = rms_deg.drop(columns=['rms_x_meters', 'rms_y_meters',
-'rms_z_meters', 'rms_total_meters', 'viewing_distance_rms_wind'])
-                       
-# Select the columns to move to the end
-columns_to_move = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
-
-# Reorder the DataFrame
-rms_deg = rms_deg[[col for col in rms_deg.columns if col not in columns_to_move] + columns_to_move]
-
-
-
-#### testing the different functions with a small df and check the ansewrs
-
-# Create a DataFrame with 3 columns x, y, and z, with random values
-df = pd.DataFrame({
-    'x': np.random.rand(10),
-    'y': np.random.rand(10),
-    'z': np.random.rand(10)
-})
-
-# Display the DataFrame
-print(df)
-
-#calculate_bcea2d_m_win_corrcoef(df, dim1, dim2, k=1, window=5):
-    
-bcea_xy_corr_test = funcs_feat.calculate_bcea2d_m_win_corrcoef(df, "x", "y", k=1, window=5) # same values as bcea_xy_cov_test
-bcea_yz_corr_test = funcs_feat.calculate_bcea2d_m_win_corrcoef(df, "y", "z", k=1, window=5) # same values as bcea_yz_cov_test
-bcea_zx_corr_test = funcs_feat.calculate_bcea2d_m_win_corrcoef(df, "z", "x", k=1, window=5) # # same values as bcea_zx_cov_test
-
-#calculate_bcea2d_m_win_cov(df, dim1, dim2, k=1, window=5):
-bcea_xy_cov_test = funcs_feat.calculate_bcea2d_m_win_cov(df, "x", "y", k=1, window=5)
-bcea_yz_cov_test = funcs_feat.calculate_bcea2d_m_win_cov(df, "y", "z", k=1, window=5)
-bcea_zx_cov_test = funcs_feat.calculate_bcea2d_m_win_cov(df, "z", "x", k=1, window=5)
-
-
-
 ############################### 11 BCEA-DIFF  ###########################################
 ##################################################################################
 
@@ -343,9 +300,28 @@ bcea_zx_cov_test = funcs_feat.calculate_bcea2d_m_win_cov(df, "z", "x", k=1, wind
 
 
 
+
+
+
+
+
+
 ######################
 
+
+
+
+######################## # 12 - Rayleightest - Tests whether the sample-to-sample directions in
+# a 22-ms window are uniformly distributed. Larsson et al. (2015)
+# Larsson, L., Nystrom, M., & Stridh, M. (2013). Detection of sac- ¨
+# cades and postsaccadic oscillations in the presence of smooth
+# pursuit. IEEE Transactions on Biomedical Engineering, 60(9),
+# 2484–2493.
+
+
+
 # 6 - fs - Sampling frequency (Hz). Mean sampling rate: 44.27 Hz  (SMI BeGaze)
+
 
 
 #### 7 is not possible because we cannot detectate saccades, Idont have this data
@@ -360,12 +336,6 @@ bcea_zx_cov_test = funcs_feat.calculate_bcea2d_m_win_cov(df, "z", "x", k=1, wind
 
 
 
-# 10 - Rayleightest - Tests whether the sample-to-sample directions in
-# a 22-ms window are uniformly distributed. Larsson et al. (2015)
-# Larsson, L., Nystrom, M., & Stridh, M. (2013). Detection of sac- ¨
-# cades and postsaccadic oscillations in the presence of smooth
-# pursuit. IEEE Transactions on Biomedical Engineering, 60(9),
-# 2484–2493.
 
 
 
