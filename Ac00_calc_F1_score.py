@@ -91,38 +91,38 @@ for i in range(1,8):
     
     
     
-    # Classification metrics
-    precision = precision_score(y_true=y_test, y_pred=y_pred, zero_division=0)
-    recall = recall_score(y_true=y_test, y_pred=y_pred, zero_division=0)
-    f1 = f1_score(y_true=y_test, y_pred=y_pred, zero_division=0)
+#     # Classification metrics
+#     precision = precision_score(y_true=y_test, y_pred=y_pred, zero_division=0)
+#     recall = recall_score(y_true=y_test, y_pred=y_pred, zero_division=0)
+#     f1 = f1_score(y_true=y_test, y_pred=y_pred, zero_division=0)
 
-    rms = mean_squared_error(y_test, y_pred, squared=False)
+#     rms = mean_squared_error(y_test, y_pred, squared=False)
 
-    # Append metrics to DataFrame
-    results_df = results_df.append({
-        "GT": f"GT{i}",
-        "Train Accuracy": train_accuracy * 100,
-        "Test Accuracy": test_accuracy * 100,
-        "Precision": precision * 100,
-        "Recall": recall * 100,
-        "F1": f1 * 100,
-        "RMS": rms
-    }, ignore_index=True)
+#     # Append metrics to DataFrame
+#     results_df = results_df.append({
+#         "GT": f"GT{i}",
+#         "Train Accuracy": train_accuracy * 100,
+#         "Test Accuracy": test_accuracy * 100,
+#         "Precision": precision * 100,
+#         "Recall": recall * 100,
+#         "F1": f1 * 100,
+#         "RMS": rms
+#     }, ignore_index=True)
 
-    print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
-    print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
-    print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
-    print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
+#     print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
+#     print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
+#     print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
+#     print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
 
-# Calculate average metrics across all GTs
-average_metrics = results_df.mean(numeric_only=True)
-print("\nAverage Metrics Across All GTs:")
-print(average_metrics)
+# # Calculate average metrics across all GTs
+# average_metrics = results_df.mean(numeric_only=True)
+# print("\nAverage Metrics Across All GTs:")
+# print(average_metrics)
 
 
-results_csv_path = f"{config['results_csv']}.csv"   
-results_df.to_csv(results_csv_path, index=False)
-print(f"Results saved to {results_csv_path}")
+# results_csv_path = f"{config['results_csv']}.csv"   
+# results_df.to_csv(results_csv_path, index=False)
+# print(f"Results saved to {results_csv_path}")
     
     
 ## Calculate RMS
@@ -428,6 +428,59 @@ from statistics import mean
 f1 = [86,84,85,84,85,85,83]
 average_f1_extracted_features = mean(f1)
 print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+
+
+# dataset original add 10 - BCEA all axis combination - complete: - ## !
+from statistics import mean 
+   
+f1 = [86,84,85,84,85,85,83]
+average_f1_extracted_features = mean(f1)
+print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+
+# dataset original add 10 - BCEA all axis combination - complete: - ## !
+from statistics import mean 
+   
+f1 = [86,84,85,84,85,85,83]
+average_f1_extracted_features = mean(f1)
+print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+
+# Confusion Matrix GT7:
+#  [[10306  2424]
+#  [ 2405 11423]]
+# 79.71 %
+# 80.14 %
+# 82.86 %
+# 83.14 %
+# 83.71 %
+# 83.71 %
+# 83.71 %
+# 84.57 %
+
+f1 = [86,84,85,84,85,85,83]
+average_f1_extracted_features = mean(f1)
+print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+
+# Confusion Matrix GT7:
+#  [[10306  2424]
+#  [ 2405 11423]]
+# 79.71 %
+# 80.14 %
+# 82.86 %
+# 83.14 %
+# 83.71 %
+# 83.71 %
+# 83.71 %
+# 84.57 %
+
+
+# dataset original add 10 - BCEA only yz : - ## !
+from statistics import mean 
+   
+f1 = [86,84,85,84,85,85,83]
+average_f1_extracted_features = mean(f1)
+print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN
+
+
 
 """ f1-score = 0.82 (1 fixation), 0.75 (0 no fixation)
 

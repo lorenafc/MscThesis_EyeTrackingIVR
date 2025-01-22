@@ -248,36 +248,53 @@ only_until_9_rms_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
 # Measures the area in which the recorded gaze position lies 
 # within a 100-ms window in (P %) of the time. (Blignaut and Beelders, 2012)
 
-# Blignaut, P., & Beelders, T. (2012). The precision of eye-trackers:
-# a case for a new measure. In Proceedings of the symposium on
-# eye tracking research and applications, ETRA ’12, (pp. 289–292).
-# New York, NY, USA: ACM
-
-# The bivariate contour ellipse (BCEA) is similar to CEP but it
-# acknowledges that the geometrical shape of fixations might be
-# elliptic. For a given proportion of samples,
- #  P = 1 -e**(-k)., k determines the proportion of samples to include in the covered area.
-# If, for example, k=1, P = 63.2%. BCEA is then defined
-# as 2 * k*  PI() * stdx * stdy * (1-p^2)**1/2 
-
-#  where sx and sy denote the standard deviations in the x and y directions respectively and p is the
-# Pearson correlation coefficient between the samples' x and y coordinates [Crossland and Rubin, 2002].
-# The area of an ellipse can be expressed as A = PI()* a* b where a is  one half of the major diameter and b is one half of the minor
-# diameter. Therefore, the following equality holds for an ellipse that includes 63.2% of the samples: 
-    # ab = 2 *stdx *stdy * (1-p^2)**1/2 
-
-
-
 
 rms_deg = pd.read_csv(config["prepr_and_features_file_updated"])
 
-bcea_xy_m = funcs_feat.calculate_bcea_m_win(rms_deg,"L_x", "L_y", k=1, window=5) # 2D data #(df, dim1, dim2, k=1, window=5)
+## all axis: xy, yz,zx:
+bcea_xy_corr = funcs_feat.calculate_bcea2d_m_win_corrcoef(rms_deg, "L_x", "L_y", k=1, window=5) # 2D data
+bcea_yz_corr = funcs_feat.calculate_bcea2d_m_win_corrcoef(rms_deg, "L_y", "L_z", k=1, window=5) # 2D data
+bcea_zx_corr = funcs_feat.calculate_bcea2d_m_win_corrcoef(rms_deg, "L_z", "L_x", k=1, window=5) # 2D data
 
-bcea_yz_m = funcs_feat.calculate_bcea_m_win(rms_deg,"L_y", "L_z", k=1, window=5) # 2D data
+# view_dist_bcea_m = funcs_feat.apply_viewing_distance_df(bcea_yz_corr, 'viewing_distance_bcea_2d_wind', "L_x", "L_y", "L_z",'C_x','C_y','C_z')
+# bcea_deg = funcs_feat.convert_met_to_degree(view_dist_bcea_m,"bcea_2d_deg", 'bcea_LyLz', 'viewing_distance_bcea_2d_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
 
-bcea_zx_m = funcs_feat.calculate_bcea_m_win(rms_deg,"L_z", "L_x", k=1, window=5)# 2D data
 
-bcea_volume = funcs_feat.calculate_3d_bcea_rolling(rms_deg, "L_x", "L_y", "L_z", k=1, window=5) # 3D data (using x, y and z at the same time)
+columns_to_move = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+bcea_xy_yz_zx = bcea_zx_corr[[col for col in bcea_zx_corr.columns if col not in columns_to_move] + columns_to_move]
+
+### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
+output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated_bcea_complete"])
+bcea_xy_yz_zx.to_csv(output_file_features_GTs_updated, index=False)
+
+
+
+## only yz:
+    
+bcea_yz_only = bcea_zx_corr.drop(columns=['bcea_L_xL_y','bcea_L_zL_x' ])
+columns_to_move = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+bcea_yz_only = bcea_zx_corr[[col for col in bcea_zx_corr.columns if col not in columns_to_move] + columns_to_move]
+
+### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
+output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated_bcea_yz"])
+bcea_yz_only.to_csv(output_file_features_GTs_updated, index=False)
+
+
+
+
+
+### ADJUST VOLUME FUNCTION WITH THE ONE YOU CREATED!!!!
+
+m = rms_deg['bcea_L_xL_y'] != 0
+mrows=m.any()
+mrows.sum()
+
+# Assuming df is your DataFrame
+non_nan_count = rms_deg['bcea_L_xL_y'].all(1).sum
+
+print(f'The number of non-NaN values in the L_x column is: {non_nan_count}')
+
+# bcea_volume = funcs_feat.calculate_3d_bcea_rolling(rms_deg, "L_x", "L_y", "L_z", k=1, window=5) # 3D data (using x, y and z at the same time)
 
 view_dist_bcea_m = funcs_feat.apply_viewing_distance_df(rms_m, 'viewing_distance_bcea_vol_wind', "L_x", "L_y", "L_z",'C_x','C_y','C_z')
 rms_deg = funcs_feat.convert_met_to_degree(view_dist_rms_m,"bcea_vol_deg", 'bcea_vol_total_meters' , 'viewing_distance_bcea_vol_wind' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
@@ -291,6 +308,30 @@ columns_to_move = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
 # Reorder the DataFrame
 rms_deg = rms_deg[[col for col in rms_deg.columns if col not in columns_to_move] + columns_to_move]
 
+
+
+#### testing the different functions with a small df and check the ansewrs
+
+# Create a DataFrame with 3 columns x, y, and z, with random values
+df = pd.DataFrame({
+    'x': np.random.rand(10),
+    'y': np.random.rand(10),
+    'z': np.random.rand(10)
+})
+
+# Display the DataFrame
+print(df)
+
+#calculate_bcea2d_m_win_corrcoef(df, dim1, dim2, k=1, window=5):
+    
+bcea_xy_corr_test = funcs_feat.calculate_bcea2d_m_win_corrcoef(df, "x", "y", k=1, window=5) # same values as bcea_xy_cov_test
+bcea_yz_corr_test = funcs_feat.calculate_bcea2d_m_win_corrcoef(df, "y", "z", k=1, window=5) # same values as bcea_yz_cov_test
+bcea_zx_corr_test = funcs_feat.calculate_bcea2d_m_win_corrcoef(df, "z", "x", k=1, window=5) # # same values as bcea_zx_cov_test
+
+#calculate_bcea2d_m_win_cov(df, dim1, dim2, k=1, window=5):
+bcea_xy_cov_test = funcs_feat.calculate_bcea2d_m_win_cov(df, "x", "y", k=1, window=5)
+bcea_yz_cov_test = funcs_feat.calculate_bcea2d_m_win_cov(df, "y", "z", k=1, window=5)
+bcea_zx_cov_test = funcs_feat.calculate_bcea2d_m_win_cov(df, "z", "x", k=1, window=5)
 
 
 

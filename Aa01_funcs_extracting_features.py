@@ -10,6 +10,26 @@ import pandas as pd
 import numpy as np
 from scipy.stats import pearsonr
 
+
+##### GENERIC FUNCTIONS
+
+def drop_and_reorder_columns(df, columns_to_drop):
+  
+    # Drop the specified columns
+    df = df.drop(columns=columns_to_drop)
+    
+    columns_to_move = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+    
+    # Reorder the DataFrame
+    df = df[[col for col in df.columns if col not in columns_to_move] + columns_to_move]
+    
+    return df
+
+def save_df(df, file_path):
+
+    df.to_csv(file_path, index=False)
+
+
 ######## VELOCITY AND ACCELERATION ##########
 
 # def velocity(df): # for some reason this function is not working and the code keeps running forever
@@ -374,9 +394,7 @@ def calculate_rms_meters_win(df, x_column, y_column, z_column, window=5, center=
 ############################### 10 BCEA #################################################
 
 
-
-
-def calculate_bcea_m_win(df, dim1, dim2, k=1, window=5):
+def calculate_bcea2d_m_win_corrcoef(df, dim1, dim2, k=1, window=5):
 
     std_x = df[dim1].rolling(window, center=True).std()
     std_y = df[dim2].rolling(window, center=True).std()
@@ -391,33 +409,150 @@ def calculate_bcea_m_win(df, dim1, dim2, k=1, window=5):
 
     # BCEA formula
     bcea = 2 * k * np.pi * std_x * std_y * np.sqrt(1 - corr**2)
-    return bcea
+    
+    bcea = bcea.fillna(0)
+        
+    # Add BCEA as a column in the DataFrame
+    df[f'bcea_{dim1}{dim2}'] = bcea
+        
+    return df
+
+# def calculate_3d_bcea_rolling(df, x_col, y_col, z_col, k=1, window=5):
+
+#     def calculate_rolling_corr(column1, column2, window):
+#         """Calculate rolling Pearson correlation."""
+#         return column1.rolling(window, center=True).apply(
+#             lambda x: pearsonr(x, column2[x.index])[0] if len(x.dropna()) > 1 else np.nan, raw=False
+#         )
+
+#     # Rolling standard deviations
+#     std_x = df[x_col].rolling(window, center=True).std()
+#     std_y = df[y_col].rolling(window, center=True).std()
+#     std_z = df[z_col].rolling(window, center=True).std()
+
+#     # Rolling correlations
+#     rho_xy = calculate_rolling_corr(df[x_col], df[y_col], window)
+#     rho_yz = calculate_rolling_corr(df[y_col], df[z_col], window)
+#     rho_zx = calculate_rolling_corr(df[z_col], df[x_col], window)
+
+#     # BCEA formula for each rolling window
+#     df["bcea_volume"] = (
+#         (4 / 3) * k * np.pi * std_x * std_y * std_z *
+#         np.sqrt(1 - rho_xy**2 - rho_yz**2 - rho_zx**2 + 2 * rho_xy * rho_yz * rho_zx)
+#     )
+
+#     return df
 
 
 
-def calculate_3d_bcea_rolling(df, x_col, y_col, z_col, k=1, window=5):
 
-    def calculate_rolling_corr(column1, column2, window):
-        """Calculate rolling Pearson correlation."""
-        return column1.rolling(window, center=True).apply(
-            lambda x: pearsonr(x, column2[x.index])[0] if len(x.dropna()) > 1 else np.nan, raw=False
-        )
+# import numpy as np
+# import pandas as pd
 
-    # Rolling standard deviations
-    std_x = df[x_col].rolling(window, center=True).std()
-    std_y = df[y_col].rolling(window, center=True).std()
-    std_z = df[z_col].rolling(window, center=True).std()
+# # Function to calculate rolling standard deviations
+# def calculate_std_meters_win(df, x_column, y_column, z_column, window=5, center=True):
+#     df['std_x_meters'] = df[x_column].rolling(window, center=center).std()
+#     df['std_y_meters'] = df[y_column].rolling(window, center=center).std()
+#     df['std_z_meters'] = df[z_column].rolling(window, center=center).std()
 
-    # Rolling correlations
-    rho_xy = calculate_rolling_corr(df[x_col], df[y_col], window)
-    rho_yz = calculate_rolling_corr(df[y_col], df[z_col], window)
-    rho_zx = calculate_rolling_corr(df[z_col], df[x_col], window)
+#     # Calculate the total standard deviation (Euclidean norm of std components)
+#     df['std_total_meters'] = (
+#         df['std_x_meters']**2 + df['std_y_meters']**2 + df['std_z_meters']**2
+#     )**0.5
 
-    # BCEA formula for each rolling window
-    df["bcea_volume"] = (
-        (4 / 3) * k * np.pi * std_x * std_y * std_z *
-        np.sqrt(1 - rho_xy**2 - rho_yz**2 - rho_zx**2 + 2 * rho_xy * rho_yz * rho_zx)
+#     return df
+
+
+# def calculate_bcea_m_win(df, dim1, dim2, k=1, window=5):
+#     # Calculate rolling means
+#     mean_x = df[dim1].rolling(window, center=True).mean()
+#     mean_y = df[dim2].rolling(window, center=True).mean()
+
+#     # Calculate rolling covariance
+#     cov_xy = (
+#         df[dim1].rolling(window, center=True).apply(lambda x: np.nanmean((x - mean_x.loc[x.index]) * (df[dim2][x.index] - mean_y.loc[x.index])), raw=False)
+#     )
+
+#     # Use `calculate_std_meters_win` for rolling standard deviations
+#     df = calculate_std_meters_win(df, dim1, dim2, z_column=None, window=window)
+
+#     # Extract std_x and std_y from the DataFrame
+#     std_x = df['std_x_meters']
+#     std_y = df['std_y_meters']
+
+#     # Calculate Pearson correlation
+#     corr = cov_xy / (std_x * std_y)
+
+#     # BCEA formula
+#     bcea = 2 * k * np.pi * std_x * std_y * np.sqrt(1 - corr**2)
+
+#     # Replace NaN values with 0
+#     bcea = bcea.fillna(0)
+
+#     return bcea
+
+
+
+# Function to calculate rolling standard deviations
+def calculate_std_meters_win(df, dim_columns, std_columns, window=5, center=True):
+  
+    for dim_col, std_col in zip(dim_columns, std_columns):
+        if std_col not in df.columns:
+            df[std_col] = df[dim_col].rolling(window, center=center).std()
+    return df
+
+# def calculate_std_meters_win(df, dim1_column, dim2_column, dim1_std_col, dim2_std_col, z_column=None, window=5, center=True):
+#     df[dim1_std_col] = df[dim1_column].rolling(window, center=center).std()
+#     df[dim2_std_col] = df[dim2_column].rolling(window, center=center).std()
+
+#     return df
+
+
+# BCEA Calculation
+def calculate_bcea2d_m_win_cov(df, dim1, dim2, k=1, window=5):
+    
+    dim1_std_col = f"{dim1}_std"
+    dim2_std_col = f"{dim2}_std"
+    
+    
+    # Calculate rolling covariance
+    def cov(x, y):
+        if len(x) < 2:
+            return np.nan
+        return np.cov(x, y)[0][1]  # Extract covariance Source: https://stackoverflow.com/questions/15317822/calculating-covariance-with-python-and-numpy
+    
+    cov_xy = df[dim1].rolling(window, center=True).apply(
+        lambda x: cov(x, df[dim2][x.index]),
+        raw=False
     )
 
+    
+    # Use rolling std calculation for 2D
+    df = calculate_std_meters_win(
+        df, 
+        dim_columns=[dim1, dim2], 
+        std_columns=[dim1_std_col, dim2_std_col], 
+        window=window
+    )
+    
+   
+    # Use rolling std calculation
+    # df = calculate_std_meters_win(df, dim1, dim2, dim1_std_col, dim2_std_col, z_column=None, window=window)
+
+    std_x = df[dim1_std_col]
+    std_y = df[dim2_std_col]
+
+    # Pearson correlation
+    corr = cov_xy / (std_x * std_y)
+
+    # BCEA formula
+    bcea = 2 * k * np.pi * std_x * std_y * np.sqrt(1 - corr**2)
+
+    # Replace NaN with 0
+    bcea = bcea.fillna(0)
+
+    # Add BCEA as a column in the DataFrame
+    df[f'bcea_{dim1}{dim2}_cov'] = bcea
+        
     return df
 

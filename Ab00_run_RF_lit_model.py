@@ -16,6 +16,11 @@ import json
 # import Aa01_funcs_extracting_features_C_gitignore as funcs
 
 
+import sys
+print(sys.executable)
+print(sys.path)
+
+
 with open('config.json') as json_file:
     config = json.load(json_file)
 
@@ -30,7 +35,7 @@ os.chdir(script_dir)
 # extracted_features = pd.read_csv(config["only_extracted_features_and_GTs_86Hz_file"]) #86Hz
 
 
-extracted_features = pd.read_csv("data/prAzza01_only_extracted_features_GTs_eye_tracking_9RMS_DEG.csv") # mean_diff degree added
+extracted_features = pd.read_csv("data/Aa01_extracted_features_eye_tracking_updated_cleaned_bcea_yz.csv") # mean_diff degree added
 
 ####### REMEMBER TO RECALCULATE THE BEST PARAMS WHEN YOU EXTRACT ALL FEATURES (YOU ARE USING THE BEST PARAMS FOR VEL AND ACC ONLY)
 #### CALCULATE FEATURE IMPORTANCE!!!
@@ -112,8 +117,8 @@ for i in range (1,8):
     
 #     rfc=RandomForestClassifier()
 #     param_grid = { 
-#         'n_estimators': [10,12,15,25,50,100,150,200,250], # add 25  - final version (there is 25 in joep best param - selected GT1 and GT2)
-#         'max_depth' : [1,2,3,4,5,6,7,8,9,10,11,12,15] # add 2, 7, 4 joep best param 2 - GT2 and 7 GT6 
+#         'n_estimators': [10, 25, 50, 100, 200], # like joep and zemblys[10,12,15,25,50,100,150,200,250], # add 25  - # 10, 25, 50, 100, 200. final version (there is 25 in joep best param - selected GT1 and GT2)
+#         'max_depth' : range(1,15,1)   # like joep [1,2,3,4,5,6,7,8,9,10,11,12,15] # add 2, 7, 4 joep best param 2 - GT2 and 7 GT6 
 #     }
 #     CV_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv= 5)
 #     CV_rfc.fit(X_train, y_train)
