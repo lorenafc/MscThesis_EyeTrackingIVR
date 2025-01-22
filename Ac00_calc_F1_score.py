@@ -13,6 +13,7 @@ import json
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix, precision_score, recall_score, f1_score, mean_squared_error
+import Aa01_funcs_extracting_features as funcs_feat
 
 # import Aa01_funcs_extracting_features_C_gitignore as funcs
 
@@ -63,7 +64,7 @@ for i in range(1, 8):
     print(f"GT{i} y_test shape:", y_test_dict[i].shape)
 
 results_df = pd.DataFrame(columns=[
-    "GT", "n_estimators", "max_depth" "Train Accuracy", "Test Accuracy", "Precision", "Recall", "F1", "RMS"
+    "GT", "n_estimators", "max_depth", "Train Accuracy", "Test Accuracy", "Precision", "Recall", "F1", "RMS"
 ])
 
 GTs=[]
@@ -131,32 +132,21 @@ for i in range(1,8):
     # print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
     # print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
 
-
 # Calculate average metrics across all GTs
 average_metrics = results_df.mean(numeric_only=True)
+average_metrics_rounded = average_metrics.round(4)
 print("\nAverage Metrics Across All GTs:")
 print(average_metrics)
-average_results_csv_path = "data/train_test_data/prAc00_average_results.csv"   
-results_df.to_csv(results_csv_path, index=False)
-print(f"Results saved to {average_results_csv_path}")
 
-results_csv_path = f"{config['results_csv']}.csv"   
-results_df.to_csv(results_csv_path, index=False)
-print(f"Results saved to {results_csv_path}")
-    
+average_metrics_df = average_metrics_rounded.reset_index()
 
-# # metrics per GT
-# results_appended = {"n_estimators": n_estimators, "max_depth": max_depth,
-#                "GT": GTs, "Train Accuracy": trains_accuracy, "Test Accuracy": tests_accuracy, "Precision":precisions, "Recall": recalls, "F1": f1s, "RMS":rmss}
+average_metrics_df.columns = ["Metric", "Value"]
 
-# results_appended = pd.DataFrame(results_appended, index=[0])
+#save average metrics 
+funcs_feat.save_df(average_metrics_df, "data/train_test_data/prAc00_average_results_bcea_xy_yz_zx.csv")
 
-# df_rf_val = pd.concat([results_df, results_appended], ignore_index=True)
-
-# # 
-# df_rf_val.to_csv("data/Ac00_classification_metrics_all_GTs_RF.csv", index=False)   
-
-
+# save all GTs metrics
+funcs_feat.save_df(results_df, "data/train_test_data/prAc00_results_bcea_xy_yz_zx.csv")
 
     
     

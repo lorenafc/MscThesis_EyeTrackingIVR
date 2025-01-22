@@ -264,20 +264,24 @@ output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_fe
 bcea_xy_yz_zx.to_csv(output_file_features_GTs_updated, index=False)
 
 
-
+bcea_yz_only.columns
 ## only yz:
     
-bcea_yz_only = bcea_zx_corr.drop(columns=['bcea_L_xL_y','bcea_L_zL_x' ])
+bcea_yz_only = bcea_zx_corr.drop(columns=['bcea_L_xL_y', 'bcea_L_zL_x' ])
 columns_to_move = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
-bcea_yz_only = bcea_zx_corr[[col for col in bcea_zx_corr.columns if col not in columns_to_move] + columns_to_move]
+bcea_yz_only = bcea_yz_only[[col for col in bcea_yz_only.columns if col not in columns_to_move] + columns_to_move]
 
 ### save full file preproc and feature extracted ## CHANGE DF NAME AND JSON CSV FILE!!
 output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_features_file_updated_bcea_yz"])
 bcea_yz_only.to_csv(output_file_features_GTs_updated, index=False)
 
+test_only_yz_rf = bcea_yz_only[['bcea_L_yL_z', 'GT1','GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']]
+funcs_feat.save_df(test_only_yz_rf, "data/Aa01_test_only_yz_GTs_rf.csv")
 
+test_only_yz_rf.columns
 
-
+test_xy_xz_zx_rf = bcea_zx_corr[["bcea_L_xL_y", "bcea_L_yL_z", "bcea_L_zL_x",'bcea_L_yL_z', 'GT1','GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']]
+funcs_feat.save_df(test_xy_xz_zx_rf, "data/Aa01_test_xy_yz_zx_rf.csv")
 
 ### ADJUST VOLUME FUNCTION WITH THE ONE YOU CREATED!!!!
 
@@ -299,11 +303,9 @@ print(f'The number of non-NaN values in the L_x column is: {non_nan_count}')
 #between two 100ms windows, one before and one after the sample. Olsson (2007)
 
 
-
-
-
-
-
+bcea_diff_xy = funcs_feat.calculate_bcea2d_window(bcea_xy_yz_zx, "L_x", "L_y", k=1, window=5)
+bcea_diff_yz = funcs_feat.calculate_bcea2d_window(bcea_diff_xy, "L_z", "L_x", k=1, window=5)
+bcea_diff_zx = funcs_feat.calculate_bcea2d_window(bcea_diff_zx, "L_z", "L_x", k=1, window=5)
 
 
 ######################

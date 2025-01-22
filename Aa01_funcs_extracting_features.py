@@ -485,7 +485,7 @@ def calculate_bcea2d_m_win_cov(df, dim1, dim2, k=1, window=5):
 
 ######################################## BCEA DIFF #######################################
 
-def calculate_bcea_window(df, dim1, dim2, k=1, window=5):
+def calculate_bcea2d_window(df, dim1, dim2, k=1, window=5):
     results_before = []
     results_after = []
     
@@ -501,6 +501,7 @@ def calculate_bcea_window(df, dim1, dim2, k=1, window=5):
         corr_before = np.corrcoef(samples_before[dim1], samples_before[dim2])[0, 1] 
         corr_before = np.nan_to_num(corr_before, nan=0.0)
         bcea_before = 2 * k * np.pi * std_x_before * std_y_before * np.sqrt(1 - corr_before**2)
+
         
         samples_after = df[row_index + 1:end_after]
         std_x_after = np.nanstd(samples_after[dim1]) 
@@ -509,9 +510,11 @@ def calculate_bcea_window(df, dim1, dim2, k=1, window=5):
         corr_after = np.nan_to_num(corr_after, nan=0.0)
         bcea_after = 2 * k * np.pi * std_x_after * std_y_after * np.sqrt(1 - corr_after**2)
 
+
         # Store the results
         results_before.append(bcea_before)
         results_after.append(bcea_after)
+        
 
     # Add results as new columns to the DataFrame
     df[f'bcea_{dim1}{dim2}_Before_Win{window}'] = np.nan_to_num(results_before, nan=0.0)

@@ -12,6 +12,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report, confusion_matrix
 import os
 import json
+import Aa01_funcs_extracting_features as funcs_feat
 
 # import Aa01_funcs_extracting_features_C_gitignore as funcs
 
@@ -35,7 +36,7 @@ os.chdir(script_dir)
 # extracted_features = pd.read_csv(config["only_extracted_features_and_GTs_86Hz_file"]) #86Hz
 
 
-extracted_features = pd.read_csv("data/Aa01_extracted_features_eye_tracking_updated_cleaned_bcea_yz.csv") # mean_diff degree added
+extracted_features = pd.read_csv("data/Aa01_test_xy_yz_zx_rf.csv") # mean_diff degree added
 
 ####### REMEMBER TO RECALCULATE THE BEST PARAMS WHEN YOU EXTRACT ALL FEATURES (YOU ARE USING THE BEST PARAMS FOR VEL AND ACC ONLY)
 #### CALCULATE FEATURE IMPORTANCE!!!
