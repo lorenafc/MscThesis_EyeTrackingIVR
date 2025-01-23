@@ -25,6 +25,22 @@ def drop_and_reorder_columns(df, columns_to_drop):
     
     return df
 
+def df_features_GTs(df,columns_to_keep):
+
+    featuers_and_GTs = df[columns_to_keep]
+    
+    return df
+ 
+
+# def df_features_GTs(df, columns_to_keep):
+
+#     GTs = ['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']
+#     all_columns_to_keep = list(set(columns_to_keep + GTs))
+#     features_and_GTs = df[[all_columns_to_keep]]
+
+#     return features_and_GTs
+
+
 def save_df(df, file_path):
 
     df.to_csv(file_path, index=False)
@@ -327,7 +343,7 @@ def calc_std_wind_dist_m(df):  #its the calc_dist_m finction vectorized
            
     return df
 
-
+#the function below is actually not necessary because the values are too similar from the column "viewing_distance"
 def calc_feature_wind_dist_m(df, new_col_feature_dist_m, x_col_feature_bef_wind, x_col_feature_aft_wind, y_col_feature_bef_wind, y_col_feature_aft_wind, z_col_feature_bef_wind, z_col_feature_aft_wind):  # its a generic function for every column name
     
     if new_col_feature_dist_m not in df.columns:

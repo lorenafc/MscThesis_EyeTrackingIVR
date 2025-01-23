@@ -304,13 +304,54 @@ print(f'The number of non-NaN values in the L_x column is: {non_nan_count}')
 
 
 bcea_diff_xy = funcs_feat.calculate_bcea2d_window(bcea_xy_yz_zx, "L_x", "L_y", k=1, window=5)
-bcea_diff_yz = funcs_feat.calculate_bcea2d_window(bcea_diff_xy, "L_z", "L_x", k=1, window=5)
-bcea_diff_zx = funcs_feat.calculate_bcea2d_window(bcea_diff_zx, "L_z", "L_x", k=1, window=5)
+bcea_diff_yz = funcs_feat.calculate_bcea2d_window(bcea_diff_xy, "L_y", "L_z", k=1, window=5)
+bcea_diff_zx = funcs_feat.calculate_bcea2d_window(bcea_diff_yz, "L_z", "L_x", k=1, window=5)
+
+non_zero_count = (bcea_diff_zx["bcea_L_xL_y"] != 0).sum()
+print(f"Number of non-zero values: {non_zero_count}") #Number of non-zero values: 8711 = 8.2%
+
+#calc distance before and after
+bcea_dist_wind_m_xy_yz_zx = funcs_feat.calc_feature_wind_dist_m(bcea_diff_zx, 'bcea_diff_wind_dist_m',  'bcea_L_xL_y_Before_Win5',
+'bcea_L_xL_y_After_Win5', 'bcea_L_yL_z_Before_Win5',
+'bcea_L_yL_z_After_Win5', 'bcea_L_zL_x_Before_Win5',
+'bcea_L_zL_x_After_Win5')
+
+
+# view_dist_bcea_diff_m = funcs_feat.apply_viewing_distance_df(rms_m, 'viewing_distance_bcea_diff_wind', "L_x", "L_y", "L_z",'C_x','C_y','C_z')
+bcea_diff_deg = funcs_feat.convert_met_to_degree(bcea_dist_wind_m_xy_yz_zx,"bcea_diff_deg", 'bcea_diff_wind_dist_m', 'viewing_distance' ) #(df, df_new_col_deg, col_dist_meters, col_view_dist)
+
+
+bcea_diff_xy_xz_zx_deg_m_clean = funcs_feat.drop_and_reorder_columns(bcea_diff_deg, ['bcea_L_xL_y_Before_Win5',
+'bcea_L_xL_y_After_Win5', 'bcea_L_yL_z_Before_Win5',
+'bcea_L_yL_z_After_Win5', 'bcea_L_zL_x_Before_Win5',
+'bcea_L_zL_x_After_Win5'])
+
+bcea_diff_xy_xz_zx_deg_clean = bcea_diff_xy_xz_zx_deg_m_clean.drop(columns=['bcea_diff_wind_dist_m'])
+
+## only beca m and deg with GTs
+
+# bcea_diff_xy_xz_zx_m_GTs = bcea_diff_xy_xz_zx_deg_m_clean[["bcea_diff_deg",'GT1','GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']]
+# bcea_diff_xy_xz_zx_deg_GTs = bcea_diff_xy_xz_zx_deg_m_clean[['bcea_diff_wind_dist_m', 'GT1','GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']]
+
+# funcs_feat.save_df(bcea_diff_xy_xz_zx_m_GTs, "data/Aa01_test_bcea_diff_xy_xz_zx_m_GTs.csv")
+# funcs_feat.save_df(bcea_diff_xy_xz_zx_deg_clean, "data/Aa01_bcea_diff_xy_xz_zx_deg_GTs.csv")
+
+####
+
+funcs_feat.save_df(bcea_diff_xy_xz_zx_deg_clean, config["prepr_and_features_file_updated"])
+
+#### Save just features and GTs ## CHANGE DF NAME AND JSON CSV FILE!!
+columns_to_keep = ['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree",  "std_deg", 'std_diff_deg', 'rms_deg', 'rms_diff_deg','bcea_L_xL_y', 'bcea_L_yL_z', 'bcea_L_zL_x', 'bcea_diff_deg', 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7' ]
+only_until_11_bceadiff_and_GTs = bcea_diff_xy_xz_zx_deg_clean[columns_to_keep] # CHANGE DF NAME- HERE!
+
+# bcea_diff_xy_xz_zx_deg_feat_GTs = funcs_feat.df_features_GTs(bcea_diff_xy_xz_zx_deg_clean,['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree",  "std_deg", 'std_diff_deg', 'rms_deg', 'rms_diff_deg','bcea_L_xL_y', 'bcea_L_yL_z', 'bcea_L_zL_x', 'bcea_diff_deg', 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7'])
+
+funcs_feat.save_df(only_until_11_bceadiff_and_GTs, config["only_extracted_features_and_GTs_TEST_file"])
 
 
 ######################
 
-
+bcea_diff_xy_xz_zx_deg_feat_GTs.columns
 
 
 ######################## # 12 - Rayleightest - Tests whether the sample-to-sample directions in
