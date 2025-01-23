@@ -97,8 +97,8 @@ for i in range(1,8):
     print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
     
     y_pred = rf.predict(X_test)
-    print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
-    print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
+    # print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
+    # print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
   
     
     # Classification metrics - 
@@ -143,14 +143,16 @@ average_metrics_df = average_metrics_rounded.reset_index()
 average_metrics_df.columns = ["Metric", "Value"]
 
 #save average metrics 
-funcs_feat.save_df(average_metrics_df, "data/train_test_data/prAc00_average_results_bcea_xy_yz_zx.csv")
+funcs_feat.save_df(average_metrics_df, "data/train_test_data/testing_features/prAc00_average_results_bcea_diff_2d_xy_yz_zx.csv")
 
 # save all GTs metrics
-funcs_feat.save_df(results_df, "data/train_test_data/prAc00_results_bcea_xy_yz_zx.csv")
+funcs_feat.save_df(results_df, "data/train_test_data/testing_features/prAc00_results_bcea_diff_2d_xy_yz_zx.csv")
 
     
     
-## Calculate RMS
+## FEATURE IMPORTANCE:
+    
+    
 
     #####################
 
@@ -394,116 +396,116 @@ funcs_feat.save_df(results_df, "data/train_test_data/prAc00_results_bcea_xy_yz_z
 
 
 
-# dataset original - 44Hz
-from statistics import mean 
+# # dataset original - 44Hz
+# from statistics import mean 
 
-f1 = [82,76,81,80,80,81,78]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 79.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925
+# f1 = [82,76,81,80,80,81,78]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 79.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925
 
 
-# dataset interpolated- 86Hz
-from statistics import mean 
+# # dataset interpolated- 86Hz
+# from statistics import mean 
 
-f1 = [82,79,81,80,80,81,78]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 80.14 % joep  μsF1 0.753  - No extracted features, ST-DBSCAN 0.925
+# f1 = [82,79,81,80,80,81,78]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 80.14 % joep  μsF1 0.753  - No extracted features, ST-DBSCAN 0.925
 
-# dataset original vel, acc and mean dist m:
+# # dataset original vel, acc and mean dist m:
     
-f1 = [84,82,84,82,83,84,81]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 82.86 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925 
+# f1 = [84,82,84,82,83,84,81]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 82.86 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925 
 
-# dataset original vel, acc and 3 MEAN DIFF:
-from statistics import mean 
+# # dataset original vel, acc and 3 MEAN DIFF:
+# from statistics import mean 
    
-f1 = [85,83,84,82,83,84,81]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 83.14 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+# f1 = [85,83,84,82,83,84,81]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 83.14 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
 
-# dataset original vel, acc, 3 MEAN DIFF and 4 DISP deg: - ## F1 decreased when Disp degrees was included!
-from statistics import mean 
+# # dataset original vel, acc, 3 MEAN DIFF and 4 DISP deg: - ## F1 decreased when Disp degrees was included!
+# from statistics import mean 
    
-f1 = [85,84,84,83,84,84,82]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+# f1 = [85,84,84,83,84,84,82]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
 
 
-# dataset original add 5 -MED-DIFF: - ## F1 decreased when Disp degrees was included!
-from statistics import mean 
+# # dataset original add 5 -MED-DIFF: - ## F1 decreased when Disp degrees was included!
+# from statistics import mean 
    
-f1 = [85,83,84,83,84,85,82]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+# f1 = [85,83,84,83,84,85,82]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
 
-# dataset original add 6 - STD: - ## F1 decreased when Disp degrees was included!
-from statistics import mean 
+# # dataset original add 6 - STD: - ## F1 decreased when Disp degrees was included!
+# from statistics import mean 
    
-f1 = [85,84,84,83,84,84,82]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+# f1 = [85,84,84,83,84,84,82]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 83.71 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
-# dataset original add 9 - RMS: - ## !
-from statistics import mean 
+# # dataset original add 9 - RMS: - ## !
+# from statistics import mean 
    
-f1 = [86,84,85,84,85,85,83]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+# f1 = [86,84,85,84,85,85,83]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
 
-# dataset original add 10 - BCEA all axis combination - complete: - ## !
-from statistics import mean 
+# # dataset original add 10 - BCEA all axis combination - complete: - ## !
+# from statistics import mean 
    
-f1 = [86,84,85,84,85,85,83]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+# f1 = [86,84,85,84,85,85,83]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
-# dataset original add 10 - BCEA all axis combination - complete: - ## !
-from statistics import mean 
+# # dataset original add 10 - BCEA all axis combination - complete: - ## !
+# from statistics import mean 
    
-f1 = [86,84,85,84,85,85,83]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+# f1 = [86,84,85,84,85,85,83]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
-# Confusion Matrix GT7:
-#  [[10306  2424]
-#  [ 2405 11423]]
-# 79.71 %
-# 80.14 %
-# 82.86 %
-# 83.14 %
-# 83.71 %
-# 83.71 %
-# 83.71 %
-# 84.57 %
+# # Confusion Matrix GT7:
+# #  [[10306  2424]
+# #  [ 2405 11423]]
+# # 79.71 %
+# # 80.14 %
+# # 82.86 %
+# # 83.14 %
+# # 83.71 %
+# # 83.71 %
+# # 83.71 %
+# # 84.57 %
 
-f1 = [86,84,85,84,85,85,83]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
+# f1 = [86,84,85,84,85,85,83]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN 0.925  
 
-# Confusion Matrix GT7:
-#  [[10306  2424]
-#  [ 2405 11423]]
-# 79.71 %
-# 80.14 %
-# 82.86 %
-# 83.14 %
-# 83.71 %
-# 83.71 %
-# 83.71 %
-# 84.57 %
+# # Confusion Matrix GT7:
+# #  [[10306  2424]
+# #  [ 2405 11423]]
+# # 79.71 %
+# # 80.14 %
+# # 82.86 %
+# # 83.14 %
+# # 83.71 %
+# # 83.71 %
+# # 83.71 %
+# # 84.57 %
 
 
-# dataset original add 10 - BCEA only yz : - ## !
-from statistics import mean 
+# # dataset original add 10 - BCEA only yz : - ## !
+# from statistics import mean 
    
-f1 = [86,84,85,84,85,85,83]
-average_f1_extracted_features = mean(f1)
-print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN
+# f1 = [86,84,85,84,85,85,83]
+# average_f1_extracted_features = mean(f1)
+# print(round(average_f1_extracted_features,2),"%") # 84.57 % joep  μsF1 0.753 - No extracted features, ST-DBSCAN
 
 
 
