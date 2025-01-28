@@ -631,9 +631,49 @@ def interpolate_and_GTs_ff(df, cols_name, N ):
     df_copy = df.copy()
     df_copy.index = df_copy.index * (N + 1) 
     df_new_cols = df_copy.reindex(np.arange(df_copy.index.max() + N + 1))
+    
     df_interp = df_new_cols[cols_name].interpolate()
     df_new_cols.update(df_interp)
-    df_GTs_filled = df_new_cols[["GT1", "GT2","GT3", "GT4","GT5", "GT6", "GT7"]].fillna(method='ffill')
+    
+    gt_columns = ["GT1", "GT2","GT3", "GT4","GT5", "GT6", "GT7", "observer"]
+    df_GTs_filled = df_new_cols[gt_columns].ffill()
     df_new_cols.update(df_GTs_filled)
        
     return df_new_cols
+
+
+def interpolate_and_GTs_ff_reset_index(df, cols_name, N ):  
+    
+    df_copy = df.copy()
+    df_copy.reset_index(drop=True, inplace=True)
+    df_copy.index = df_copy.index * (N + 1) 
+    df_new_cols = df_copy.reindex(np.arange(df_copy.index.max() + N + 1))
+    
+    df_interp = df_new_cols[cols_name].interpolate()
+    df_new_cols.update(df_interp)
+    
+    gt_columns = ["GT1", "GT2","GT3", "GT4","GT5", "GT6", "GT7", "observer"]
+    df_GTs_filled = df_new_cols[gt_columns].ffill()
+    df_new_cols.update(df_GTs_filled)
+       
+    return df_new_cols
+
+
+
+def select_observer_freq():
+    observers_per_freq ={}
+    Hz = ['freq_N0_44Hz', 'freq_N1_87Hz', 'freq_N2_130Hz', 'freq_N3_174Hz', 'freq_N4_217Hz']
+    
+    for index, freq in enumerate(Hz):
+    
+        lists=[]
+        
+        for i in range(index+1,54,4):
+            list = lists.append(i)
+        print(lists)
+    
+        observers_per_freq[freq] = lists
+    
+    return observers_per_freq
+
+
