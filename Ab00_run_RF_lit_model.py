@@ -36,10 +36,22 @@ os.chdir(script_dir)
 # extracted_features = pd.read_csv(config["only_extracted_features_and_GTs_86Hz_file"]) #86Hz
 
 
-extracted_features = pd.read_csv("data/prAzza01_only_extracted_features_GTs_eye_tracking_11BCEA_DIFF_DEG.csv") # bcea_diff 2d  degree added
+extracted_features = pd.read_csv("data/RF/Aa01_test_xy_yz_zx_rf.csv") # bcea_diff 3d  degree added
+# # extracted_features_add_feature = pd.read_csv("data/Aa01_test_only_bcea_yz_3d_GTs_rf.csv")
+
 
 ####### REMEMBER TO RECALCULATE THE BEST PARAMS WHEN YOU EXTRACT ALL FEATURES (YOU ARE USING THE BEST PARAMS FOR VEL AND ACC ONLY)
 #### CALCULATE FEATURE IMPORTANCE!!!
+
+# bcea_yz_only_rf = extracted_features.copy()
+
+# # preprocessing + 3d +yz
+# bcea_yz_3d_noise_rf = pd.concat([extracted_features, three_D_noise["bcea_3d_noise"]], axis=1)
+
+# extracted_features = bcea_yz_3d_noise_rf.copy()
+
+# XY_YZ_ZX.head()
+extracted_features = extracted_features.drop(columns=["bcea_L_yL_z.1"])
 
 
 ###### X train and X test without GT1
@@ -125,8 +137,8 @@ for i in range (1,8):
 #     CV_rfc.fit(X_train, y_train)
 #     print(f" for the ground truth GT{i} the best parameters are: {CV_rfc.best_params_}")
 
-  
     
+  
 #     best_params = CV_rfc.best_params_
     
 #     rf = RandomForestClassifier(n_estimators=best_params['n_estimators'], max_depth=best_params['max_depth'], n_jobs=-1) # replave by params.json instead of best params #GT1  max dep 6, n est 50.

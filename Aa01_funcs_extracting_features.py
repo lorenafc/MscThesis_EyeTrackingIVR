@@ -48,13 +48,13 @@ def save_df(df, file_path):
 
 ######## VELOCITY AND ACCELERATION ##########
 
-# def velocity(df): # for some reason this function is not working and the code keeps running forever
+# def velocity(df): # for some reason this function is not working and the code keeps running forever,
+# so it is in the main script instead of the function script
 
 #     df["velocity_deg_s"] = df["cm_to_deg_inside_VE"] / df["time_diff"]
 #     return df
 
 # def acceleration(df):  # for some reason this function is not working and the code keeps running forever
-
 
 #     df["acceler_deg_s"] = df["velocity_deg_s"] / df["time_diff"]
 #     return df
@@ -64,7 +64,7 @@ def save_df(df, file_path):
 ######### MEAN DIFF ##############
 
 
-def calculate_average_window(df, columns, window=4):  # win = for the others changed from 4 to 5 to be close to 100ms (approx 90ms)
+def calculate_average_window(df, columns, window=5):  # win = for the others changed from 4 to 5 to be close to 100ms (approx 90ms)
 
     for column in columns:
         results = []
@@ -114,7 +114,9 @@ def calc_mean_dist_m(df): # a bit slow to run
     return df    
 
 
-def calc_viewing_distance(lx,ly,lz,cx,cy,cz):    # Calculate only before
+def calc_viewing_distance(lx,ly,lz,cx,cy,cz):    
+# Best to always use this function to calculate viewing distance. 
+# Instead of using the values of the window before
     
     sqr_dist_x = (cx-lx)**2
     sqr_dist_y = (cy-ly)**2
@@ -122,6 +124,10 @@ def calc_viewing_distance(lx,ly,lz,cx,cy,cz):    # Calculate only before
 
     sum_square_distances = sqr_dist_x + sqr_dist_y + sqr_dist_z
     viewing_distance = round(math.sqrt(sum_square_distances),4)
+    
+    #df["viewing_distance"] = viewing_distance
+    
+    # return df
     
     return viewing_distance
 
@@ -138,7 +144,7 @@ def apply_viewing_distance_df(df): # calculate only viewing dist before to use i
 # ).round(4)
 
     
-    for gaze, row in df.iterrows():
+    for gaze, row in df.iterrows(): # altered this part of the function to consider only L_X y anz y, and not the values before win4
         viewing_distance = calc_viewing_distance(row["L_x_Avg_Before_Win4"], row["L_y_Avg_Before_Win4"],row["L_z_Avg_Before_Win4"], row["C_x_Avg_Before_Win4"],row["C_y_Avg_Before_Win4"], row["C_z_Avg_Before_Win4"])    
      
         df.at[gaze,'viewing_distance_avg_wind'] = viewing_distance
@@ -240,11 +246,11 @@ def calculate_median_window(df, columns, window=5): #win = changed from 4 to 5 t
 
             # Samples before
             samples_before = df[start_before:row_index]
-            median_before = np.nanmedian(samples_before[column]) if len(samples_before) > 0 else np.nan 
+            median_before = np.nanmedian(samples_before[column]) # if len(samples_before) > 0 else np.nan 
 
             # Samples after
             samples_after = df[row_index + 1:end_after]
-            median_after = np.nanmedian(samples_after[column]) if len(samples_after) > 0 else np.nan 
+            median_after = np.nanmedian(samples_after[column]) # if len(samples_after) > 0 else np.nan 
 
             # Append the result as a tuple 
             results.append((median_before, median_after))
@@ -314,11 +320,11 @@ def calculate_std_window(df, columns, window=5):
 
             # Samples before
             samples_before = df[start_before:row_index]
-            std_before = np.nanstd(samples_before[column]) if len(samples_before) > 0 else np.nan 
+            std_before = np.nanstd(samples_before[column]) #if len(samples_before) > 0 else np.nan 
 
             # Samples after
             samples_after = df[row_index + 1:end_after]
-            std_after = np.nanstd(samples_after[column]) if len(samples_after) > 0 else np.nan 
+            std_after = np.nanstd(samples_after[column]) #if len(samples_after) > 0 else np.nan 
 
             # Append the result as a tuple
             results.append((std_before, std_after))
@@ -371,11 +377,11 @@ def calculate_rms_window(df, columns, window=5): # a bit slow to run
 
             # Samples before
             samples_before = df[start_before:row_index]
-            rms_before = np.sqrt(np.nanmean(samples_before[column]**2)) if len(samples_before) > 0 else np.nan 
+            rms_before = np.sqrt(np.nanmean(samples_before[column]**2)) #if len(samples_before) > 0 else np.nan 
 
             # Samples after
             samples_after = df[row_index + 1:end_after]
-            rms_after = np.sqrt(np.nanmean(samples_after[column]**2)) if len(samples_after) > 0 else np.nan 
+            rms_after = np.sqrt(np.nanmean(samples_after[column]**2)) #if len(samples_after) > 0 else np.nan 
 
             # Append the result as a tuple
             results.append((rms_before, rms_after))
@@ -451,55 +457,116 @@ def calculate_std_meters_win(df, dim_columns, std_columns, window=5, center=True
 #     return df
 
 
-# BCEA Calculation
-def calculate_bcea2d_m_win_cov(df, dim1, dim2, k=1, window=5):
+# # BCEA Calculation = calculate_bcea2d_m_win_corrcoef
+# def calculate_bcea2d_m_win_cov(df, dim1, dim2, k=1, window=5):
     
-    dim1_std_col = f"{dim1}_std"
-    dim2_std_col = f"{dim2}_std"
+#     dim1_std_col = f"{dim1}_std"
+#     dim2_std_col = f"{dim2}_std"
     
     
-    # Calculate rolling covariance
-    def cov(x, y):
-        if len(x) < 2:
-            return np.nan
-        return np.cov(x, y)[0][1]  # Extract covariance Source: https://stackoverflow.com/questions/15317822/calculating-covariance-with-python-and-numpy
+#     # Calculate rolling covariance
+#     def cov(x, y):
+#         if len(x) < 2:
+#             return np.nan
+#         return np.cov(x, y)[0][1]  # Extract covariance Source: https://stackoverflow.com/questions/15317822/calculating-covariance-with-python-and-numpy
     
-    cov_xy = df[dim1].rolling(window, center=True).apply(
-        lambda x: cov(x, df[dim2][x.index]),
-        raw=False
-    )
+#     cov_xy = df[dim1].rolling(window, center=True).apply(
+#         lambda x: cov(x, df[dim2][x.index]),
+#         raw=False
+#     )
 
     
-    # Use rolling std calculation for 2D
-    df = calculate_std_meters_win(
-        df, 
-        dim_columns=[dim1, dim2], 
-        std_columns=[dim1_std_col, dim2_std_col], 
-        window=window
-    )
+#     # Use rolling std calculation for 2D
+#     df = calculate_std_meters_win(
+#         df, 
+#         dim_columns=[dim1, dim2], 
+#         std_columns=[dim1_std_col, dim2_std_col], 
+#         window=window
+#     )
     
    
-    # Use rolling std calculation
-    # df = calculate_std_meters_win(df, dim1, dim2, dim1_std_col, dim2_std_col, z_column=None, window=window)
+#     # Use rolling std calculation
+#     # df = calculate_std_meters_win(df, dim1, dim2, dim1_std_col, dim2_std_col, z_column=None, window=window)
 
-    std_x = df[dim1_std_col]
-    std_y = df[dim2_std_col]
+#     std_x = df[dim1_std_col]
+#     std_y = df[dim2_std_col]
 
-    # Pearson correlation
-    corr = cov_xy / (std_x * std_y)
+#     # Pearson correlation
+#     corr = cov_xy / (std_x * std_y)
 
-    # BCEA formula
-    bcea = 2 * k * np.pi * std_x * std_y * np.sqrt(1 - corr**2)
+#     # BCEA formula
+#     bcea = 2 * k * np.pi * std_x * std_y * np.sqrt(1 - corr**2)
 
-    # Replace NaN with 0
-    bcea = bcea.fillna(0)
+#     # Replace NaN with 0
+#     bcea = bcea.fillna(0)
 
-    # Add BCEA as a column in the DataFrame
-    df[f'bcea_{dim1}{dim2}_cov'] = bcea
+#     # Add BCEA as a column in the DataFrame
+#     df[f'bcea_{dim1}{dim2}_cov'] = bcea
         
+#     return df
+
+
+def calculate_std_only_m_win(df, x_column, y_column, z_column, window=5, center=True):
+    
+    df['std_x_m'] = df[x_column].rolling(window, center=center).std()
+    df['std_y_m'] = df[y_column].rolling(window, center=center).std()
+    df['std_z_m'] = df[z_column].rolling(window, center=center).std()
+    
     return df
 
-######################################## BCEA DIFF #######################################
+
+def calculate_pearson(df, dim1, dim2, dim3, window=5): # std_x_col, std_y_col, std_z_col
+
+    # std_x = df[std_x_col]
+    # std_y = df[std_y_col]
+    # std_z = df[std_z_col]   
+
+    # Pearson correlation
+    def rolling_corr(x, y):
+        return np.corrcoef(x, y)[0, 1]
+
+    corr = df[dim1].rolling(window, center=True).apply(
+        lambda x: rolling_corr(x, df[dim2][x.index]), raw=False
+    )
+    
+    corr = corr.fillna(0)
+    
+    df[f"pearson_{dim1}_{dim2}"] = corr
+    
+    
+    return df
+
+
+def calculate_bcea_volume(df, std_x_col, std_y_col, std_z_col, pearson_xy_col, pearson_yz_col, pearson_zx_col, k=1):
+  
+    volume = (4/3) * 2 * k * math.pi**2 * df[std_x_col] * df[std_y_col] * df[std_z_col] * (
+        2 * k * math.pi * 
+        (1 - df[pearson_xy_col]**2).apply(math.sqrt) * 
+        (1 - df[pearson_yz_col]**2).apply(math.sqrt) * 
+        (1 - df[pearson_zx_col]**2).apply(math.sqrt)
+    ).apply(math.sqrt)
+    
+    volume = volume.fillna(0)
+    df["bcea_3d"] = volume
+    
+    return df
+
+# 3 to include a small epsilon (e.g. (std_x+0.01),(std_y+0.01) and (std_z+0.1)) 
+def calculate_bcea_volume_noise(df, std_x_col, std_y_col, std_z_col, pearson_xy_col, pearson_yz_col, pearson_zx_col, k=1):
+  
+    volume = (4/3) * 2 * k * math.pi**2 * (df[std_x_col]+0.001) * (df[std_y_col]+0.001)* (df[std_z_col] + 0.001)* (
+        2 * k * math.pi * 
+        (1 - df[pearson_xy_col]**2).apply(math.sqrt) * 
+        (1 - df[pearson_yz_col]**2).apply(math.sqrt) * 
+        (1 - df[pearson_zx_col]**2).apply(math.sqrt)
+    ).apply(math.sqrt)
+    
+    volume = volume.fillna(0)
+    df["bcea_3d_noise"] = volume
+    
+    return df
+
+######################################## 11 BCEA DIFF #######################################
 
 def calculate_bcea2d_window(df, dim1, dim2, k=1, window=5):
     results_before = []
@@ -537,3 +604,36 @@ def calculate_bcea2d_window(df, dim1, dim2, k=1, window=5):
     df[f'bcea_{dim1}{dim2}_After_Win{window}'] = np.nan_to_num(results_after, nan=0.0)
     
     return df
+
+
+
+######################################## 11 FREQUENCY #######################################
+
+
+# source: https://stackoverflow.com/questions/58427391/how-to-add-24-rows-under-each-row-in-python-pandas-dataframe 
+
+# def interpolate(df, N, col_names):
+    
+#     """ 
+#      adds N - number of empty rows created between two following rows in a df and interpolate the values
+     
+#     """  
+  
+#     df.copy().index = df.index * (N + 1) 
+#     dftest = df.reindex(np.arange(df.index.max() + N + 1))
+    
+#     dftest = dftest.loc[col_names].interpolate()
+    
+#     return dftest
+
+def interpolate_and_GTs_ff(df, cols_name, N ):  
+    
+    df_copy = df.copy()
+    df_copy.index = df_copy.index * (N + 1) 
+    df_new_cols = df_copy.reindex(np.arange(df_copy.index.max() + N + 1))
+    df_interp = df_new_cols[cols_name].interpolate()
+    df_new_cols.update(df_interp)
+    df_GTs_filled = df_new_cols[["GT1", "GT2","GT3", "GT4","GT5", "GT6", "GT7"]].fillna(method='ffill')
+    df_new_cols.update(df_GTs_filled)
+       
+    return df_new_cols

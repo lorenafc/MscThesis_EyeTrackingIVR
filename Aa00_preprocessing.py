@@ -39,9 +39,9 @@ import numpy as np
 
 
 
-N = 1 # add 1 row - aprox 86 Hz:
+N = 1 # add 1 row - aprox 86 Hz: # N - number of empty rows created
     
-preproc_et.index = preproc_et.index * (N + 1)
+preproc_et.index = preproc_et.index * (N + 1) 
 preproc_et = preproc_et.reindex(np.arange(preproc_et.index.max() + N + 1))
 print (preproc_et.head())
 
@@ -51,7 +51,7 @@ preproc_interp = preproc_et.interpolate()
 
 
 
-preproc_interp_no_GTS = preproc_interp.drop(columns=['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7'])
+preproc_interp_no_GTS = preproc_interp.drop(columns=['GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']) # drop all the columns to make the calculation=====================================================================================
 
 
 # merge columns of df preproc_et (GTs with NaN) in the preproc_interp_no_GTS df. After that, fill the NAN values in columns GT1 to GT7 with the values of the previous column

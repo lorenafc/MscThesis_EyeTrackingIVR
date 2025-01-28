@@ -25,6 +25,7 @@ import json
 
 import Aa00_funcs_preprocessing as funcs_prep
 import Aa01_funcs_extracting_features as funcs_feat
+import Aa01_TEST_frequenc_funcs_extracting_features
 
 
 with open('config.json') as json_file:
@@ -247,6 +248,9 @@ only_until_9_rms_and_GTs.to_csv(output_file_features_GTs_TEST, index=False)
 
 rms_deg = pd.read_csv(config["prepr_and_features_file_updated"])
 
+
+#### 2D #####
+
 ## all axis: xy, yz,zx:
 bcea_xy_corr = funcs_feat.calculate_bcea2d_m_win_corrcoef(rms_deg, "L_x", "L_y", k=1, window=5) # 2D data
 bcea_yz_corr = funcs_feat.calculate_bcea2d_m_win_corrcoef(rms_deg, "L_y", "L_z", k=1, window=5) # 2D data
@@ -264,7 +268,6 @@ output_file_features_GTs_updated = os.path.join(script_dir, config["prepr_and_fe
 bcea_xy_yz_zx.to_csv(output_file_features_GTs_updated, index=False)
 
 
-bcea_yz_only.columns
 ## only yz:
     
 bcea_yz_only = bcea_zx_corr.drop(columns=['bcea_L_xL_y', 'bcea_L_zL_x' ])
@@ -283,18 +286,69 @@ test_only_yz_rf.columns
 test_xy_xz_zx_rf = bcea_zx_corr[["bcea_L_xL_y", "bcea_L_yL_z", "bcea_L_zL_x",'bcea_L_yL_z', 'GT1','GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']]
 funcs_feat.save_df(test_xy_xz_zx_rf, "data/Aa01_test_xy_yz_zx_rf.csv")
 
-### ADJUST VOLUME FUNCTION WITH THE ONE YOU CREATED!!!!
+######### 3D ###################
 
-m = rms_deg['bcea_L_xL_y'] != 0
-mrows=m.any()
-mrows.sum()
+std_xyz = funcs_feat.calculate_std_only_m_win(rms_deg, "L_x" , "L_y","L_z", window=5, center=True)
 
-# Assuming df is your DataFrame
-non_nan_count = rms_deg['bcea_L_xL_y'].all(1).sum
+pearson_xy = funcs_feat.calculate_pearson(rms_deg, "L_x" , "L_y","L_z",  window=5)
+pearson_yz = funcs_feat.calculate_pearson(pearson_xy, "L_y","L_z", "L_x" , window=5)
+pearson_zx = funcs_feat.calculate_pearson(pearson_yz, "L_z" , "L_x","L_y", window=5)
 
-print(f'The number of non-NaN values in the L_x column is: {non_nan_count}')
+pearson_xy.columns
 
-# bcea_volume = funcs_feat.calculate_3d_bcea_rolling(rms_deg, "L_x", "L_y", "L_z", k=1, window=5) # 3D data (using x, y and z at the same time)
+bcea_3d = funcs_feat.calculate_bcea_volume(pearson_zx, "std_x_m", "std_y_m", "std_z_m", "pearson_L_x_L_y", "pearson_L_y_L_z", "pearson_L_z_L_x") 
+
+only_bcea_3d_GTs = bcea_3d[['bcea_3d','GT1','GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']] 
+funcs_feat.save_df(only_bcea_3d_GTs, "data/Aa01_test_only_bcea3d_GTs_rf.csv")
+
+# Example values for k and Pearson correlations
+k = 1.0
+pearson_xy = 0.5
+pearson_yz = 0.6
+pearson_zx = 0.7
+
+# Calculate the volume
+volume = funcs_feat.calculate_bcea_volume(k, pearson_xy, pearson_yz, pearson_zx)
+print(f"The calculated volume is: {volume}")
+
+
+## combine xy plane with 3D 
+
+
+bcea_xy = pd.read_csv("data/Aa01_test_only_yz_GTs_rf.csv") #config["prepr_and_features_file_updated"]"")
+
+
+col_bcea_yz = bcea_xy["bcea_L_yL_z"]
+
+col_bcea_3d = bcea_3d["bcea_3d"]
+ 
+
+# preprocessing + 3d +yz
+bcea_3d_yz = pd.concat([bcea_3d, col_bcea_yz], axis=1)
+funcs_feat.save_df(bcea_3d_yz, "data/Aa01_test_preproc_bcea3d_yz.csv")
+
+# only yz 3d and gts for test in the rf model
+bcea_yz_3d_GT_only = pd.concat([bcea_xy, col_bcea_3d], axis=1)
+
+second_col = bcea_yz_3d_GT_only.pop('bcea_3d')
+bcea_yz_3d_GT_only.insert(1, 'bcea_3d', second_col)
+
+funcs_feat.save_df(bcea_yz_3d_GT_only, "data/Aa01_test_only_bcea_yz_3d_GTs_rf.csv")
+
+# bcea_3d with noise
+
+bcea_3d_noise = funcs_feat.calculate_bcea_volume_noise(bcea_3d, "std_x_m", "std_y_m", "std_z_m", "pearson_L_x_L_y", "pearson_L_y_L_z", "pearson_L_z_L_x") 
+
+# extract only 3d_noise for RF
+
+bcea_3d_noise_rf = bcea_3d_noise[["bcea_3d_noise", 'GT1','GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']]
+funcs_feat.save_df(only_bcea_3d_GTs, "data/Aa01_test_only_bcea3d_noise_GTs_rf.csv")
+
+
+
+
+
+
 
 ############################### 11 BCEA-DIFF  ###########################################
 ##################################################################################
@@ -349,10 +403,14 @@ only_until_11_bceadiff_and_GTs = bcea_diff_xy_xz_zx_deg_clean[columns_to_keep] #
 funcs_feat.save_df(only_until_11_bceadiff_and_GTs, config["only_extracted_features_and_GTs_TEST_file"])
 
 
-######################
+###################### DATA FOR CV IN THE RF ###################
 
-bcea_diff_xy_xz_zx_deg_feat_GTs.columns
+prepr_11_bcea_diff = pd.read_csv("data/prAzza01_only_extracted_features_GTs_eye_tracking_11BCEA_DIFF_DEG.csv")
+prepr_11_bcea_diff.columns
 
+#bcea_diff_obs = pd.concat([prepr_11_bcea_diff, pearson_zx["observer"]], axis=1)
+
+funcs_feat.save_df(bcea_diff_obs, "data/prA_bcea_diff_observ_GTs_CV_RF.csv")
 
 ######################## # 12 - Rayleightest - Tests whether the sample-to-sample directions in
 # a 22-ms window are uniformly distributed. Larsson et al. (2015)
@@ -361,6 +419,9 @@ bcea_diff_xy_xz_zx_deg_feat_GTs.columns
 # pursuit. IEEE Transactions on Biomedical Engineering, 60(9),
 # 2484–2493.
 
+## A novel algorithm for detection of saccades and postsaccadic oscillations in the presence of 
+# smooth pursuit movements is proposed. The method combines saccade detection in the acceleration domain 
+# with specialized on- and offset criteria for saccades and postsaccadic oscillations. 
 
 
 # 6 - fs - Sampling frequency (Hz). Mean sampling rate: 44.27 Hz  (SMI BeGaze)
@@ -377,34 +438,6 @@ bcea_diff_xy_xz_zx_deg_feat_GTs.columns
 # 1–22. doi:10.3758/s13428-016-0822-1
 
 
-
-
-
-
-
-
-
-
-
-# Example DataFrame
-data2 = {'observer': [1, 2, 3, 4, 5, 6, 7.1, 8,9,10,11,12,13,14]}
-median_degTEST = pd.DataFrame(data2)
-
-# Identify rows where the observer value is a float and its decimal part is not 0
-rows_to_remove = median_degTEST[median_degTEST['observer'] % 1 != 0].index
-
-# Extend the range to include 5 rows before and 5 rows after
-extended_rows_to_remove = set()
-for idx in rows_to_remove:
-    extended_rows_to_remove.update(range(max(0, idx - 5), min(len(median_degTEST), idx + 6)))
-
-# Create a new DataFrame excluding these rows
-median_degTEST_no_float_zero = median_degTEST.drop(index=extended_rows_to_remove).reset_index(drop=True)
-
-print("Original DataFrame:")
-print(median_degTEST)
-print("\nFiltered DataFrame:")
-print(median_degTEST_no_float_zero)
 
 
 # clean columns not used for other features and save data:
