@@ -36,7 +36,7 @@ os.chdir(script_dir)
 # extracted_features = pd.read_csv(config["only_extracted_features_and_GTs_86Hz_file"]) #86Hz
 
 
-extracted_features = pd.read_csv("data/RF/Aa01_test_xy_yz_zx_rf.csv") # bcea_diff 3d  degree added
+extracted_features = pd.read_csv("data Aa00_preprocessed_eye_tracking_217Hz.csv") #/RF/Aa01_test_xy_yz_zx_rf.csv") # bcea_diff 3d  degree added
 # # extracted_features_add_feature = pd.read_csv("data/Aa01_test_only_bcea_yz_3d_GTs_rf.csv")
 
 
@@ -51,7 +51,7 @@ extracted_features = pd.read_csv("data/RF/Aa01_test_xy_yz_zx_rf.csv") # bcea_dif
 # extracted_features = bcea_yz_3d_noise_rf.copy()
 
 # XY_YZ_ZX.head()
-extracted_features = extracted_features.drop(columns=["bcea_L_yL_z.1"])
+# extracted_features = extracted_features.drop(columns=["bcea_L_yL_z.1"])
 
 
 ###### X train and X test without GT1

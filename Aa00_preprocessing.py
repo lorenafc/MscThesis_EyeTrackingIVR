@@ -42,15 +42,14 @@ eye_tracking_data = pd.read_csv(path_file)
 
 
 obs_freq = funcs_feat.select_observer_freq()
-
-et_data_time_diff = funcs_prep.calc_time_diff(eye_tracking_data)
+et_data_time_diff_freq = funcs_prep.calc_time_diff_freq(eye_tracking_data)
 
 
 ### ROWS 44HZ ORIGINAL
 
 
 
-rows_obs_44Hz = et_data[et_data["observer"].isin(obs_freq['freq_N0_44Hz'])]  # '44Hz': [1, 6, 11, 16, 21, 26, 31, 36, 41, 46, 51]                          
+rows_obs_44Hz = eye_tracking_data[eye_tracking_data["observer"].isin(obs_freq['freq_N0_44Hz'])]  # '44Hz': [1, 6, 11, 16, 21, 26, 31, 36, 41, 46, 51]                          
 # dont interpolate original data
 et_data_44Hz_original = rows_obs_44Hz.copy()
 
@@ -64,7 +63,7 @@ funcs_feat.save_df(et_data_44Hz_original, "data/Aa01_et_data_44Hz_original_split
 ## ROWS 87 HZ    
 
                  
-rows_obs_87Hz = et_data_time_diff[et_data_time_diff["observer"].isin(obs_freq["freq_N1_87Hz"])]  # '87Hz': [2, 7, 12, 17, 22, 27, 32, 37, 42, 47, 52]                         
+rows_obs_87Hz = eye_tracking_data[eye_tracking_data["observer"].isin(obs_freq["freq_N1_87Hz"])]  # '87Hz': [2, 7, 12, 17, 22, 27, 32, 37, 42, 47, 52]                         
 et_data_87Hz_reset_index = funcs_feat.interpolate_and_GTs_ff_reset_index(rows_obs_87Hz, ["time",'L_x', 'L_y', 'L_z', 'C_x', 'C_y', 'C_z'], 1 ) # # source: https://stackoverflow.com/questions/58427391/how-to-add-24-rows-under-each-row-in-python-pandas-dataframe 
 
 # et_data_87Hz_reset_index = pd.read_csv("data/Aa01_et_data_87Hz_reset_index.csv")
@@ -73,7 +72,7 @@ et_data_87Hz_reset_index["count_freq"] = range(1, len(et_data_87Hz_reset_index) 
 funcs_feat.save_df(et_data_87Hz_reset_index, "data/Aa01_et_data_87Hz_reset_index.csv")
 
 ### ROWS 130HZ
-rows_obs_130Hz = et_data[et_data["observer"].isin(obs_freq['freq_N2_130Hz'])]  # '130Hz': [3, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53]                    
+rows_obs_130Hz = eye_tracking_data[eye_tracking_data["observer"].isin(obs_freq['freq_N2_130Hz'])]  # '130Hz': [3, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53]                    
 et_data_130Hz_reset_index = funcs_feat.interpolate_and_GTs_ff_reset_index(rows_obs_130Hz, ["time",'L_x', 'L_y', 'L_z', 'C_x', 'C_y', 'C_z'], 2)  
 
 
@@ -85,7 +84,7 @@ funcs_feat.save_df(et_data_130Hz_reset_index, "data/Aa01_et_data_130Hz_reset_ind
 
 ### ROWS 174HZ
 
-rows_obs_174Hz = et_data[et_data["observer"].isin(obs_freq['freq_N3_174Hz'])]  # '174Hz': [4, 9, 14, 19, 24, 29, 34, 39, 44, 49]                           
+rows_obs_174Hz = eye_tracking_data[eye_tracking_data["observer"].isin(obs_freq['freq_N3_174Hz'])]  # '174Hz': [4, 9, 14, 19, 24, 29, 34, 39, 44, 49]                           
 et_data_174Hz_reset_index = funcs_feat.interpolate_and_GTs_ff_reset_index(rows_obs_174Hz, ["time",'L_x', 'L_y', 'L_z', 'C_x', 'C_y', 'C_z'], 3)  
 
 # et_data_174Hz_reset_index = pd.read_csv("data/Aa01_et_data_174Hz_reset_index.csv")
@@ -96,7 +95,7 @@ funcs_feat.save_df(et_data_174Hz_reset_index, "data/Aa01_et_data_174Hz_reset_ind
 
 ### ROWS 217HZ
 
-rows_obs_217Hz = et_data[et_data["observer"].isin(obs_freq['freq_N4_217Hz'])]  # '217Hz': [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]                      
+rows_obs_217Hz = eye_tracking_data[eye_tracking_data["observer"].isin(obs_freq['freq_N4_217Hz'])]  # '217Hz': [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]                      
 et_data_217Hz_reset_index = funcs_feat.interpolate_and_GTs_ff_reset_index(rows_obs_217Hz, ["time",'L_x', 'L_y', 'L_z', 'C_x', 'C_y', 'C_z'], 4)  
 
 
@@ -104,39 +103,106 @@ et_data_217Hz_reset_index = funcs_feat.interpolate_and_GTs_ff_reset_index(rows_o
 # et_data_217Hz_reset_index = pd.read_csv("data/Aa01_et_data_217Hz_reset_index.csv")
 et_data_217Hz_reset_index["count_freq"] = range(1, len(et_data_217Hz_reset_index) + 1) # https://stataiml.com/posts/add_increment_number_pandas/
 
-
-
-
 funcs_feat.save_df(et_data_217Hz_reset_index, "data/Aa01_et_data_217Hz_reset_index.csv")
 
-## CONCAT THEM ALL TOGETHER
+
+
+## rename the colum time_diff of all of the rows (but you change the time_diff function so need to do it only once)
+
+# Dictionary of DataFrames
+df_dict = {
+    "et_data_44Hz_original": et_data_44Hz_original,
+    "et_data_87Hz_reset_index": et_data_87Hz_reset_index,
+    "et_data_130Hz_reset_index": et_data_130Hz_reset_index,
+    "et_data_174Hz_reset_index": et_data_174Hz_reset_index,
+    "et_data_217Hz_reset_index": et_data_217Hz_reset_index
+}
+
+# Rename "time_diff" in each DataFrame
+df_dict = {key: df.rename(columns={"time_diff": "time_diff_freq_NaN"}) for key, df in df_dict.items()}
+
+# Access updated DataFrames
+et_data_44Hz_original = df_dict["et_data_44Hz_original"]
+et_data_87Hz_reset_index = df_dict["et_data_87Hz_reset_index"]
+et_data_130Hz_reset_index = df_dict["et_data_130Hz_reset_index"]
+et_data_174Hz_reset_index = df_dict["et_data_174Hz_reset_index"]
+et_data_217Hz_reset_index = df_dict["et_data_217Hz_reset_index"]
+
+funcs_feat.save_df(et_data_44Hz_original, "data/Aa01_et_data_44Hz_original_split_observers_frequency.csv") 
+funcs_feat.save_df(et_data_87Hz_reset_index, "data/Aa01_et_data_87Hz_reset_index.csv")
+funcs_feat.save_df(et_data_130Hz_reset_index, "data/Aa01_et_data_130Hz_reset_index.csv")
+funcs_feat.save_df(et_data_174Hz_reset_index, "data/Aa01_et_data_174Hz_reset_index.csv")
+funcs_feat.save_df(et_data_217Hz_reset_index, "data/Aa01_et_data_217Hz_reset_index.csv")
+
+
+
+
+
+## - REMOVE IT TO THE END OF FEATURE EXTRACTION - CONCAT THEM ALL TOGETHER - needs to be done after extracting all features - because of the windows.
+
 vertical_concat_all_wrong_order_observ = pd.concat([et_data_44Hz_original, et_data_87Hz_reset_index, et_data_130Hz_reset_index, et_data_174Hz_reset_index, et_data_217Hz_reset_index], axis=0, ignore_index=True)   
 # et_data_concat_observer_right_order = vertical_concat_all_wrong_order_observ.sort_values(by=['observer'])
 
 vertical_concat_all_wrong_reset = vertical_concat_all_wrong_order_observ.reset_index()
 et_data_concat_observer_right_order = vertical_concat_all_wrong_reset.sort_values(['observer', 'index'], ascending=[True, True]) # https://stackoverflow.com/questions/17141558/how-to-sort-a-pandas-dataframe-by-two-or-more-columns
 
+et_data_concat_observer_right_order = et_data_concat_observer_right_order.rename(columns={"time_diff": "time_diff_freq_NaN"})
+# eye_tracking_data = eye_tracking_data.drop(columns="") better rename than drop to track the NaN
+
 funcs_feat.save_df(et_data_concat_observer_right_order, "data/Aa01_et_data_concat_observer_right_order_count_freq_checked.csv")
+
 
 preprocessed_et_data = et_data_concat_observer_right_order.copy()
 
-#### After adding different frequencies to the original dataset:
+
+#### Preprocess and extract features of the 5- diff frequencies separately:
 
     
-"data/Aa01_et_data_concat_observer_right_order_count_freq_checked.csv"    
-
-
+eye_tracking_data = pd.read_csv("data/Aa01_et_data_concat_observer_right_order_count_freq_checked.csv")
+ 
 eye_tracking_data_cm2deg_new = funcs.process_eye_tracking_data(eye_tracking_data)
-
-output_file = os.path.join(script_dir, config["preprocessed_data_file"])
-eye_tracking_data_cm2deg_new.to_csv(output_file, index=False)
-
-
-# testing data with 100Hz instead of 44Hz (current dataset)
+funcs_feat.save_df(eye_tracking_data_cm2deg_new, "data/Aa00_preprocessed_eye_tracking_freq.csv")
+funcs_feat.save_df(eye_tracking_data_cm2deg_new, config["preprocessed_data_file"])
 
 
+#### preprocess all the 5 df frequencies:
+    
+## optimize the  preprocessing with the code below code messes the columns coordinates_dist and cm_to_deg_inside_VE with lots of NaN
+# freqs = [44, 87,130, 174, 217]
+# df_dict = {
+#     44: et_data_44Hz_original,
+#     87: et_data_87Hz_reset_index,  
+#     130: et_data_130Hz_reset_index,
+#     174: et_data_174Hz_reset_index,
+#     217: et_data_217Hz_reset_index
+# }
 
 
+# for freq, df in df_dict.items():
+#     et_cm2deg = funcs.process_eye_tracking_data(df)
+#     filename = f"data/Aa00_preprocessed_eye_tracking_{freq}Hz.csv"
+#     funcs_feat.save_df(et_cm2deg, filename)
+  
+    
+et_data_44Hz_original = pd.read_csv("data/Aa01_et_data_44Hz_original_split_observers_frequency.csv")
+et_44Hz_cm2deg = funcs.process_eye_tracking_data(et_data_44Hz_original)
+funcs_feat.save_df(et_44Hz_cm2deg, "data/Aa00_preprocessed_eye_tracking_44Hz.csv")
+
+et_data_87Hz_reset_index = pd.read_csv("data/Aa01_et_data_87Hz_reset_index.csv")
+et_87Hz_cm2deg = funcs.process_eye_tracking_data(et_data_87Hz_reset_index)
+funcs_feat.save_df(et_87Hz_cm2deg, "data/Aa00_preprocessed_eye_tracking_87Hz.csv")
+
+et_data_130Hz_reset_index = pd.read_csv("data/Aa01_et_data_130Hz_reset_index.csv")
+et_130Hz_cm2deg = funcs.process_eye_tracking_data(et_data_130Hz_reset_index)
+funcs_feat.save_df(et_130Hz_cm2deg, "data/Aa00_preprocessed_eye_tracking_130Hz.csv")
+
+et_data_174Hz_reset_index = pd.read_csv("data/Aa01_et_data_174Hz_reset_index.csv")
+et_174Hz_cm2deg = funcs.process_eye_tracking_data(et_data_174Hz_reset_index)
+funcs_feat.save_df(et_174Hz_cm2deg, "data/Aa00_preprocessed_eye_tracking_174Hz.csv")
+
+et_data_217Hz_reset_index = pd.read_csv("data/Aa01_et_data_217Hz_reset_index.csv")
+et_217Hz_cm2deg = funcs.process_eye_tracking_data(et_data_217Hz_reset_index)
+funcs_feat.save_df(et_217Hz_cm2deg, "data/Aa00_preprocessed_eye_tracking_217Hz.csv")
 
 
 # import numpy as np

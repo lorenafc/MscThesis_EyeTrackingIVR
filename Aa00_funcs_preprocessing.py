@@ -37,12 +37,21 @@ def apply_viewing_distance_df(df):
 
 def calc_time_diff(df):
     
-    if "time_diff" not in df.columns:
-        df["time_diff"] = ""         
+    if "time_diff" not in df.columns:        
         df["time_diff"] = df["time"].diff().fillna(0)
-        df["time_diff"] = pd.to_numeric(df["time_diff"], errors='coerce')
+        df["time_diff"] = pd.to_numeric(df["time_diff"], errors='coerce').round(5)
         
     return df
+
+
+def calc_time_diff_freq(df):
+    
+    if "time_diff_freq_NaN" not in df.columns:        
+        df["time_diff_freq_NaN"] = df["time"].diff().fillna(0)
+        df["time_diff_freq_NaN"] = pd.to_numeric(df["time_diff_freq_NaN"], errors='coerce').round(5)
+        
+    return df
+   
    
 def calc_coordinates(df):
     
@@ -122,7 +131,7 @@ def process_eye_tracking_data(df):
 
 
 
-def calculate_average_window(df, columns, window=4): #win = for the other functions changed from 4 to 5 to be close to 100ms (approx 90ms)
+def calculate_average_window(df, columns, window): #win = for the other functions changed from 4 to 5 to be close to 100ms (approx 90ms)
 
     for column in columns:
         results = []

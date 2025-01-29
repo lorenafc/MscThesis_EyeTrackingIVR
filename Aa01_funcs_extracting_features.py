@@ -64,7 +64,7 @@ def save_df(df, file_path):
 ######### MEAN DIFF ##############
 
 
-def calculate_average_window(df, columns, window=5):  # win = for the others changed from 4 to 5 to be close to 100ms (approx 90ms)
+def calculate_average_window(df, columns, window):  # win = for the others changed from 4 to 5 to be close to 100ms (approx 90ms)
 
     for column in columns:
         results = []
@@ -91,15 +91,15 @@ def calculate_average_window(df, columns, window=5):  # win = for the others cha
     return df
 
 
-def calc_mean_dist_m(df): # a bit slow to run
+def calc_mean_dist_m(df, window): # a bit slow to run
     
     if "mean_dist_m" not in df.columns:
         df["mean_dist_m"] = ""
         
     for gaze in range(1, len(df)):
         
-        x, y, z  = df.iloc[gaze]["L_x_Avg_After_Win4"], df.iloc[gaze]["L_y_Avg_After_Win4"], df.iloc[gaze]["L_z_Avg_After_Win4"]
-        prev_x, prev_y, prev_z = df.iloc[gaze]["L_x_Avg_Before_Win4"], df.iloc[gaze]["L_y_Avg_Before_Win4"], df.iloc[gaze]["L_z_Avg_Before_Win4"]
+        x, y, z  = df.iloc[gaze][f"L_x_Avg_After_Win{window}"], df.iloc[gaze][f"L_y_Avg_After_Win{window}"], df.iloc[gaze][f"L_z_Avg_After_Win{window}"]
+        prev_x, prev_y, prev_z = df.iloc[gaze][f"L_x_Avg_Before_Win{window}"], df.iloc[gaze][f"L_y_Avg_Before_Win{window}"], df.iloc[gaze][f"L_z_Avg_Before_Win{window}"]
     
         sqr_dist_x = (x - prev_x)**2
         sqr_dist_y = (y - prev_y)**2
@@ -694,3 +694,58 @@ def select_observer_freq():
 obs_freq = select_observer_freq()
 print(obs_freq)
 
+
+
+def process_frequency_data(et_data, obs_freq, funcs_feat):
+    """
+    Processes eye-tracking data for different frequency groups by:
+    1. Selecting rows for each frequency group based on observer IDs.
+    2. Optionally interpolating and resetting index (if frequency > 44Hz).
+    3. Adding a count column.
+    4. Saving the processed DataFrame to a CSV file.
+    
+    Parameters:
+        et_data (pd.DataFrame): The main dataset containing all observations.
+        obs_freq (dict): Dictionary mapping frequency labels to observer lists.
+        funcs_feat (module): Feature functions module (for saving and interpolation).
+    
+    Returns:
+        dict: Dictionary of processed DataFrames for each frequency.
+    """
+
+    Hz_groups = {
+        'freq_N0_44Hz': {"reset_index": False, "interpolation_step": None},
+        'freq_N1_87Hz': {"reset_index": True, "interpolation_step": 1},
+        'freq_N2_130Hz': {"reset_index": True, "interpolation_step": 2},
+        'freq_N3_174Hz': {"reset_index": True, "interpolation_step": 3},
+        'freq_N4_217Hz': {"reset_index": True, "interpolation_step": 4},
+    }
+
+    processed_data = {}
+
+    for freq, settings in Hz_groups.items():
+        # Select rows where observer is in the given frequency group
+        rows_obs = et_data[et_data["observer"].isin(obs_freq[freq])]
+
+        # Apply interpolation if needed
+        if settings["reset_index"]:
+            processed_df = funcs_feat.interpolate_and_GTs_ff_reset_index(
+                rows_obs, ["time", "L_x", "L_y", "L_z", "C_x", "C_y", "C_z"], settings["interpolation_step"]
+            )
+        else:
+            processed_df = rows_obs.copy()
+
+        # Add a count column
+        processed_df["count_freq"] = range(1, len(processed_df) + 1)
+
+        # Save the processed DataFrame
+        filename = f"data/Aa01_et_data_{freq}_processed.csv"
+        funcs_feat.save_df(processed_df, filename)
+
+        # Store the processed DataFrame for further use
+        processed_data[freq] = processed_df
+
+    return processed_data  # Returns a dictionary of all processed DataFrames
+
+# Call the function
+processed_freq_data = process_frequency_data(et_data, obs_freq, funcs_feat)
