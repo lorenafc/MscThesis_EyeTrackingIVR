@@ -660,20 +660,37 @@ def interpolate_and_GTs_ff_reset_index(df, cols_name, N ):
 
 
 
-def select_observer_freq():
-    observers_per_freq ={}
-    Hz = ['freq_N0_44Hz', 'freq_N1_87Hz', 'freq_N2_130Hz', 'freq_N3_174Hz', 'freq_N4_217Hz']
+# def select_observer_freq():
+#     observers_per_freq ={}
+#     Hz = ['freq_N0_44Hz', 'freq_N1_87Hz', 'freq_N2_130Hz', 'freq_N3_174Hz', 'freq_N4_217Hz']
     
-    for index, freq in enumerate(Hz):
+#     for index, freq in enumerate(Hz):
     
-        lists=[]
+#         lists=[]
         
-        for i in range(index+1,54,4):
-            list = lists.append(i)
-        print(lists)
+#         for i in range(index+1,54,5):
+#             list = lists.append(i)
+#         print(lists)
     
-        observers_per_freq[freq] = lists
+#         observers_per_freq[freq] = lists
     
+#     return observers_per_freq
+
+
+def select_observer_freq():
+    
+    observers_per_freq = {}  
+    Hz = ['freq_N0_44Hz', 'freq_N1_87Hz', 'freq_N2_130Hz', 'freq_N3_174Hz', 'freq_N4_217Hz']
+    observers = list(range(1, 54))
+
+    # Distribute observers in a round-robin way
+    for i, freq in enumerate(Hz):
+        # observers_per_freq[freq] = [observers[j] for j in range(i, len(observers), len(Hz))]
+        observers_per_freq[freq] = observers[i::len(Hz)]  # Take every 5th observer starting from i
+
     return observers_per_freq
 
+# Run the function
+obs_freq = select_observer_freq()
+print(obs_freq)
 
