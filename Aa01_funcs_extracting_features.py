@@ -131,7 +131,7 @@ def calc_viewing_distance(lx,ly,lz,cx,cy,cz):
     
     return viewing_distance
 
-def apply_viewing_distance_df(df): # calculate only viewing dist before to use in the formula to convert the mean_dist_m to mean_diff in degrees.
+def apply_viewing_distance_df_mean_diff(df, window): # calculate only viewing dist before to use in the formula to convert the mean_dist_m to mean_diff in degrees.
     
     if "viewing_distance_avg_wind" not in df.columns:
         df["viewing_distance_avg_wind"] = ""
@@ -145,7 +145,7 @@ def apply_viewing_distance_df(df): # calculate only viewing dist before to use i
 
     
     for gaze, row in df.iterrows(): # altered this part of the function to consider only L_X y anz y, and not the values before win4
-        viewing_distance = calc_viewing_distance(row["L_x_Avg_Before_Win4"], row["L_y_Avg_Before_Win4"],row["L_z_Avg_Before_Win4"], row["C_x_Avg_Before_Win4"],row["C_y_Avg_Before_Win4"], row["C_z_Avg_Before_Win4"])    
+        viewing_distance = calc_viewing_distance(row[f"L_x_Avg_Before_Win{window}"], row[f"L_y_Avg_Before_Win{window}"],row[f"L_z_Avg_Before_Win{window}"], row[f"C_x_Avg_Before_Win{window}"],row[f"C_y_Avg_Before_Win{window}"], row[f"C_z_Avg_Before_Win{window}"])    
      
         df.at[gaze,'viewing_distance_avg_wind'] = viewing_distance
     df['viewing_distance_avg_wind'] = df['viewing_distance_avg_wind'].round(4)
@@ -176,7 +176,7 @@ def mean_diff_degree_inside_VE(df): # based on GazeParser library, by Hiroyuki S
 
 ######## DISPERSION #################
 
-def calculate_dispersion_meters(df, x_column, y_column, z_column, window=5, center = True): # window = 5 
+def calculate_dispersion_meters(df, x_column, y_column, z_column, window, center = True): # window = 5 
 
     df['dispersion_meters'] = (
         df[x_column].rolling(window, center=center).max() - df[x_column].rolling(window, center=center).min() +
@@ -235,7 +235,7 @@ def convert_met_to_degree(df, df_new_col_deg, col_dist_meters, col_view_dist): #
 ############## MED-DIFF #####################
 
 
-def calculate_median_window(df, columns, window=5): #win = changed from 4 to 5 to be close to 100ms (approx 90ms)
+def calculate_median_window(df, columns, window): #win = changed from 4 to 5 to be close to 100ms (approx 90ms)
 
     for column in columns:
         results = []
@@ -261,7 +261,7 @@ def calculate_median_window(df, columns, window=5): #win = changed from 4 to 5 t
 
     return df
 
-def calc_median_dist_m(df, window=5): # a bit slow to run
+def calc_median_dist_m(df, window): # a bit slow to run
     
     if "median_dist_m" not in df.columns:
         df["median_dist_m"] = ""
@@ -290,7 +290,7 @@ def calc_median_dist_m(df, window=5): # a bit slow to run
 
 
 # Function to calculate rolling standard deviations
-def calculate_std_meters_win(df, x_column, y_column, z_column, window=5, center=True):
+def calculate_std_meters_win(df, x_column, y_column, z_column, window, center=True):
     
     df['std_x_meters'] = df[x_column].rolling(window, center=center).std()
     df['std_y_meters'] = df[y_column].rolling(window, center=center).std()
@@ -310,7 +310,7 @@ def calculate_std_meters_win(df, x_column, y_column, z_column, window=5, center=
 ############################## 7 STD - DIFF ############################################
 
 
-def calculate_std_window(df, columns, window=5):
+def calculate_std_window(df, columns, window):
     for column in columns:
         results = []
         for row_index in range(len(df)):
@@ -367,7 +367,7 @@ def calc_feature_wind_dist_m(df, new_col_feature_dist_m, x_col_feature_bef_wind,
 ############################## 8 RMS - DIFF ############################################
 
 
-def calculate_rms_window(df, columns, window=5): # a bit slow to run
+def calculate_rms_window(df, columns, window): # a bit slow to run
     for column in columns:
         results = []
         for row_index in range(len(df)):
@@ -396,7 +396,7 @@ def calculate_rms_window(df, columns, window=5): # a bit slow to run
 ############################### 9 RMS ###########################################
 
 
-def calculate_rms_meters_win(df, x_column, y_column, z_column, window=5, center=True):
+def calculate_rms_meters_win(df, x_column, y_column, z_column, window, center=True):
 
     df['rms_x_meters'] = df[x_column].rolling(window, center=center).apply(
         lambda x: np.sqrt(np.nanmean(x**2)), raw=True
@@ -418,7 +418,7 @@ def calculate_rms_meters_win(df, x_column, y_column, z_column, window=5, center=
 ############################### 10 BCEA #################################################
 
 
-def calculate_bcea2d_m_win_corrcoef(df, dim1, dim2, k=1, window=5):
+def calculate_bcea2d_m_win_corrcoef(df, dim1, dim2, window, k=1) :
 
     std_x = df[dim1].rolling(window, center=True).std()
     std_y = df[dim2].rolling(window, center=True).std()
@@ -443,7 +443,7 @@ def calculate_bcea2d_m_win_corrcoef(df, dim1, dim2, k=1, window=5):
 
 
 # Function to calculate rolling standard deviations
-def calculate_std_meters_win(df, dim_columns, std_columns, window=5, center=True):
+def calculate_std_meters_win(df, dim_columns, std_columns, window, center=True):
   
     for dim_col, std_col in zip(dim_columns, std_columns):
         if std_col not in df.columns:
@@ -506,7 +506,7 @@ def calculate_std_meters_win(df, dim_columns, std_columns, window=5, center=True
 #     return df
 
 
-def calculate_std_only_m_win(df, x_column, y_column, z_column, window=5, center=True):
+def calculate_std_only_m_win(df, x_column, y_column, z_column, window, center=True):
     
     df['std_x_m'] = df[x_column].rolling(window, center=center).std()
     df['std_y_m'] = df[y_column].rolling(window, center=center).std()
@@ -568,7 +568,7 @@ def calculate_bcea_volume_noise(df, std_x_col, std_y_col, std_z_col, pearson_xy_
 
 ######################################## 11 BCEA DIFF #######################################
 
-def calculate_bcea2d_window(df, dim1, dim2, k=1, window=5):
+def calculate_bcea2d_window(df, dim1, dim2, window, k=1):
     results_before = []
     results_after = []
     
@@ -692,60 +692,57 @@ def select_observer_freq():
 
 # Run the function
 obs_freq = select_observer_freq()
-print(obs_freq)
 
 
 
-def process_frequency_data(et_data, obs_freq, funcs_feat):
-    """
-    Processes eye-tracking data for different frequency groups by:
-    1. Selecting rows for each frequency group based on observer IDs.
-    2. Optionally interpolating and resetting index (if frequency > 44Hz).
-    3. Adding a count column.
-    4. Saving the processed DataFrame to a CSV file.
+
+# def process_frequency_data(et_data, obs_freq, funcs_feat):
+#     """
+#     Processes eye-tracking data for different frequency groups by:
+#     1. Selecting rows for each frequency group based on observer IDs.
+#     2. Optionally interpolating and resetting index (if frequency > 44Hz).
+#     3. Adding a count column.
+#     4. Saving the processed DataFrame to a CSV file.
     
-    Parameters:
-        et_data (pd.DataFrame): The main dataset containing all observations.
-        obs_freq (dict): Dictionary mapping frequency labels to observer lists.
-        funcs_feat (module): Feature functions module (for saving and interpolation).
+#     Parameters:
+#         et_data (pd.DataFrame): The main dataset containing all observations.
+#         obs_freq (dict): Dictionary mapping frequency labels to observer lists.
+#         funcs_feat (module): Feature functions module (for saving and interpolation).
     
-    Returns:
-        dict: Dictionary of processed DataFrames for each frequency.
-    """
+#     Returns:
+#         dict: Dictionary of processed DataFrames for each frequency.
+#     """
 
-    Hz_groups = {
-        'freq_N0_44Hz': {"reset_index": False, "interpolation_step": None},
-        'freq_N1_87Hz': {"reset_index": True, "interpolation_step": 1},
-        'freq_N2_130Hz': {"reset_index": True, "interpolation_step": 2},
-        'freq_N3_174Hz': {"reset_index": True, "interpolation_step": 3},
-        'freq_N4_217Hz': {"reset_index": True, "interpolation_step": 4},
-    }
+#     Hz_groups = {
+#         'freq_N0_44Hz': {"reset_index": False, "interpolation_step": None},
+#         'freq_N1_87Hz': {"reset_index": True, "interpolation_step": 1},
+#         'freq_N2_130Hz': {"reset_index": True, "interpolation_step": 2},
+#         'freq_N3_174Hz': {"reset_index": True, "interpolation_step": 3},
+#         'freq_N4_217Hz': {"reset_index": True, "interpolation_step": 4},
+#     }
 
-    processed_data = {}
+#     processed_data = {}
 
-    for freq, settings in Hz_groups.items():
-        # Select rows where observer is in the given frequency group
-        rows_obs = et_data[et_data["observer"].isin(obs_freq[freq])]
+#     for freq, settings in Hz_groups.items():
+#         # Select rows where observer is in the given frequency group
+#         rows_obs = et_data[et_data["observer"].isin(obs_freq[freq])]
 
-        # Apply interpolation if needed
-        if settings["reset_index"]:
-            processed_df = funcs_feat.interpolate_and_GTs_ff_reset_index(
-                rows_obs, ["time", "L_x", "L_y", "L_z", "C_x", "C_y", "C_z"], settings["interpolation_step"]
-            )
-        else:
-            processed_df = rows_obs.copy()
+#         # Apply interpolation if needed
+#         if settings["reset_index"]:
+#             processed_df = funcs_feat.interpolate_and_GTs_ff_reset_index(
+#                 rows_obs, ["time", "L_x", "L_y", "L_z", "C_x", "C_y", "C_z"], settings["interpolation_step"]
+#             )
+#         else:
+#             processed_df = rows_obs.copy()
 
-        # Add a count column
-        processed_df["count_freq"] = range(1, len(processed_df) + 1)
+#         # Add a count column
+#         processed_df["count_freq"] = range(1, len(processed_df) + 1)
 
-        # Save the processed DataFrame
-        filename = f"data/Aa01_et_data_{freq}_processed.csv"
-        funcs_feat.save_df(processed_df, filename)
+#         # Save the processed DataFrame
+#         filename = f"data/Aa01_et_data_{freq}_processed.csv"
+#         funcs_feat.save_df(processed_df, filename)
 
-        # Store the processed DataFrame for further use
-        processed_data[freq] = processed_df
+#         # Store the processed DataFrame for further use
+#         processed_data[freq] = processed_df
 
-    return processed_data  # Returns a dictionary of all processed DataFrames
-
-# Call the function
-processed_freq_data = process_frequency_data(et_data, obs_freq, funcs_feat)
+#     return processed_data  # Returns a dictionary of all processed DataFrames
