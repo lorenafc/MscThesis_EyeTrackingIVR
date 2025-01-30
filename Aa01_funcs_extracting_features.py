@@ -290,7 +290,7 @@ def calc_median_dist_m(df, window): # a bit slow to run
 
 
 # Function to calculate rolling standard deviations
-def calculate_std_meters_win(df, x_column, y_column, z_column, window, center=True):
+def calculate_std_meters_win_orig(df, x_column, y_column, z_column, window, center=True):
     
     df['std_x_meters'] = df[x_column].rolling(window, center=center).std()
     df['std_y_meters'] = df[y_column].rolling(window, center=center).std()
@@ -303,6 +303,47 @@ def calculate_std_meters_win(df, x_column, y_column, z_column, window, center=Tr
         
     return df
 
+def calculate_std_meters_win(df, x_column, y_column, z_column, window, center=True):
+    # Debug: Print the columns being accessed
+    print(f"Accessing columns: {x_column}, {y_column}, {z_column}")
+    
+    # Debug: Check if columns exist in the DataFrame
+    if x_column not in df.columns:
+        raise KeyError(f"Column '{x_column}' not found in DataFrame.")
+    if y_column not in df.columns:
+        raise KeyError(f"Column '{y_column}' not found in DataFrame.")
+    if z_column not in df.columns:
+        raise KeyError(f"Column '{z_column}' not found in DataFrame.")
+    
+    # Debug: Print the first few rows of the columns
+    print(df[[x_column, y_column, z_column]].head())
+    
+    # Debug: Check if rolling works on individual columns
+    try:
+        print(df[x_column].rolling(window, center=center).std().head())
+    except Exception as e:
+        print(f"Error with column '{x_column}': {e}")
+    
+    try:
+        print(df[y_column].rolling(window, center=center).std().head())
+    except Exception as e:
+        print(f"Error with column '{y_column}': {e}")
+    
+    try:
+        print(df[z_column].rolling(window, center=center).std().head())
+    except Exception as e:
+        print(f"Error with column '{z_column}': {e}")
+    
+    df['std_x_meters'] = df[x_column].rolling(window, center=center).std()
+    df['std_y_meters'] = df[y_column].rolling(window, center=center).std()
+    df['std_z_meters'] = df[z_column].rolling(window, center=center).std()
+    
+    # Calculate the total standard deviation (Euclidean norm of std components)
+    df['std_total_meters'] = (
+        df['std_x_meters']**2 + df['std_y_meters']**2 + df['std_z_meters']**2
+    )**0.5
+        
+    return df
 
 # apply_viewing_distance_df
 #  convert_met_to_degree
