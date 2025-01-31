@@ -606,7 +606,37 @@ def calculate_bcea2d_window(df, dim1, dim2, window, k=1):
     
     return df
 
-def calculate_bcea3d_window(df, dim1, dim2, dim3, window, std_x_col, std_y_col, std_z_col, pearson_xy_col, pearson_yz_col, pearson_zx_col, k=1):
+#only one plane - yz:
+def calc_feature_wind_dist_m_2dim(df, new_col_feature_dist_m, y_col_feature_bef_wind, y_col_feature_aft_wind):  # its a generic function for every column name
+    
+    if new_col_feature_dist_m not in df.columns:
+        df[new_col_feature_dist_m] = ""
+        
+    df[new_col_feature_dist_m] = (
+         (df[y_col_feature_aft_wind]-df[y_col_feature_bef_wind])**2 )**0.5
+           
+    return df 
+
+
+def calculate_pearson2d(df, dim1, dim2, window): # std_x_col, std_y_col, std_z_col
+
+    # Pearson correlation
+    def rolling_corr(x, y):
+        return np.corrcoef(x, y)[0, 1]
+
+    corr = df[dim1].rolling(window, center=True).apply(
+        lambda x: rolling_corr(x, df[dim2][x.index]), raw=False
+    )
+    
+    corr = corr.fillna(0)
+    
+    df[f"pearson_{dim1}_{dim2}"] = corr
+    
+    
+    return df
+
+
+def calculate_bcea3d_window_noise(df, dim1, dim2, dim3, window, k=1): #std_x_col, std_y_col, std_z_col, pearson_xy_col, pearson_yz_col, pearson_zx_col,
     results_before = []
     results_after = []
     
@@ -617,20 +647,29 @@ def calculate_bcea3d_window(df, dim1, dim2, dim3, window, std_x_col, std_y_col, 
         
 
         samples_before = df[start_before:row_index]
-        std_x_before = np.nanstd(samples_before[dim1]) 
-        std_y_before = np.nanstd(samples_before[dim2]) 
-        std_z_before = np.nanstd(samples_before[dim3])
-        corr_before = np.corrcoef(samples_before[dim1], samples_before[dim2])[0, 1] 
-        corr_before = np.nan_to_num(corr_before, nan=0.0)
-        bcea_before = calculate_bcea_volume_noise(df, std_x_before, std_y_before, std_z_before, pearson_xy_col, pearson_yz_col, pearson_zx_col, k=1)
-
         
+        std_x_before = np.nanstd(samples_before[dim1]) 
+        std_y_before = np.nanstd(samples_before[dim2])  
+        std_z_before = np.nanstd(samples_before[dim3])
+        
+        pearson_xy_col_bef = calculate_pearson2d(samples_before[dim1], f"{dim1}", f"{dim2}", window)
+        pearson_yz_col_bef = calculate_pearson2d(samples_before[dim1], f"{dim2}", f"{dim3}", window)
+        pearson_zx_col_bef = calculate_pearson2d(samples_before[dim1], f"{dim3}", f"{dim1}", window) 
+
+
+        bcea_before = calculate_bcea_volume_noise(df, std_x_before, std_y_before, std_z_before, pearson_xy_col_bef, pearson_yz_col_bef, pearson_zx_col_bef, k=1)
+
+  
         samples_after = df[row_index + 1:end_after]
         std_x_after = np.nanstd(samples_after[dim1]) 
-        std_y_after = np.nanstd(samples_after[dim2]) 
-        corr_after = np.corrcoef(samples_after[dim1], samples_after[dim2])[0, 1] 
-        corr_after = np.nan_to_num(corr_after, nan=0.0)
-        bcea_after = calculate_bcea_volume_noise(df, std_x_col, std_y_col, std_z_col, pearson_xy_col, pearson_yz_col, pearson_zx_col, k=1)
+        std_y_after = np.nanstd(samples_after[dim2])
+        std_z_after = np.nanstd(samples_after[dim3])
+        
+        pearson_xy_col_aft = calculate_pearson2d(samples_after[dim1], f"{dim1}", f"{dim2}", window) 
+        pearson_yz_col_aft = calculate_pearson2d(samples_after[dim1], f"{dim2}", f"{dim3}", window)
+        pearson_zx_col_aft = calculate_pearson2d(samples_after[dim1], f"{dim3}", f"{dim1}", window)
+
+        bcea_after = calculate_bcea_volume_noise(df, std_x_col_after, std_y_col_after, std_z_col_after, pearson_xy_col_aft, pearson_yz_col_aft, pearson_zx_col_aft, k=1)
 
 
         # Store the results
