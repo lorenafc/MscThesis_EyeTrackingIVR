@@ -303,47 +303,7 @@ def calculate_std_meters_win_orig(df, x_column, y_column, z_column, window, cent
         
     return df
 
-def calculate_std_meters_win(df, x_column, y_column, z_column, window, center=True):
-    # Debug: Print the columns being accessed
-    print(f"Accessing columns: {x_column}, {y_column}, {z_column}")
-    
-    # Debug: Check if columns exist in the DataFrame
-    if x_column not in df.columns:
-        raise KeyError(f"Column '{x_column}' not found in DataFrame.")
-    if y_column not in df.columns:
-        raise KeyError(f"Column '{y_column}' not found in DataFrame.")
-    if z_column not in df.columns:
-        raise KeyError(f"Column '{z_column}' not found in DataFrame.")
-    
-    # Debug: Print the first few rows of the columns
-    print(df[[x_column, y_column, z_column]].head())
-    
-    # Debug: Check if rolling works on individual columns
-    try:
-        print(df[x_column].rolling(window, center=center).std().head())
-    except Exception as e:
-        print(f"Error with column '{x_column}': {e}")
-    
-    try:
-        print(df[y_column].rolling(window, center=center).std().head())
-    except Exception as e:
-        print(f"Error with column '{y_column}': {e}")
-    
-    try:
-        print(df[z_column].rolling(window, center=center).std().head())
-    except Exception as e:
-        print(f"Error with column '{z_column}': {e}")
-    
-    df['std_x_meters'] = df[x_column].rolling(window, center=center).std()
-    df['std_y_meters'] = df[y_column].rolling(window, center=center).std()
-    df['std_z_meters'] = df[z_column].rolling(window, center=center).std()
-    
-    # Calculate the total standard deviation (Euclidean norm of std components)
-    df['std_total_meters'] = (
-        df['std_x_meters']**2 + df['std_y_meters']**2 + df['std_z_meters']**2
-    )**0.5
-        
-    return df
+
 
 # apply_viewing_distance_df
 #  convert_met_to_degree
@@ -379,13 +339,13 @@ def calculate_std_window(df, columns, window):
 
 
 
-def calc_std_wind_dist_m(df):  #its the calc_dist_m finction vectorized
+def calc_std_wind_dist_m(df, window):  #its the calc_dist_m finction vectorized
     
     if "std_wind_dist_m" not in df.columns:
         df["std_wind_dist_m"] = ""
         
     df['std_wind_dist_m'] = round(
-        ((df["L_x_Std_After_Win5"]-df["L_x_Std_Before_Win5"])**2 +  (df["L_y_Std_After_Win5"]-df["L_y_Std_Before_Win5"])**2 +  (df["L_z_Std_After_Win5"]-df["L_z_Std_Before_Win5"])**2
+        ((df[f"L_x_Std_After_Win{window}"]-df[f"L_x_Std_Before_Win{window}"])**2 +  (df[f"L_y_Std_After_Win{window}"]-df[f"L_y_Std_Before_Win{window}"])**2 +  (df[f"L_z_Std_After_Win{window}"]-df[f"L_z_Std_Before_Win{window}"])**2
     )**0.5,4)
            
     return df
@@ -556,7 +516,7 @@ def calculate_std_only_m_win(df, x_column, y_column, z_column, window, center=Tr
     return df
 
 
-def calculate_pearson(df, dim1, dim2, dim3, window=5): # std_x_col, std_y_col, std_z_col
+def calculate_pearson(df, dim1, dim2, dim3, window): # std_x_col, std_y_col, std_z_col
 
     # std_x = df[std_x_col]
     # std_y = df[std_y_col]
@@ -646,7 +606,43 @@ def calculate_bcea2d_window(df, dim1, dim2, window, k=1):
     
     return df
 
+def calculate_bcea3d_window(df, dim1, dim2, dim3, window, std_x_col, std_y_col, std_z_col, pearson_xy_col, pearson_yz_col, pearson_zx_col, k=1):
+    results_before = []
+    results_after = []
+    
+    for row_index in range(len(df)):
+ 
+        start_before = max(0, row_index - window)
+        end_after = min(len(df), row_index + window + 1)
+        
 
+        samples_before = df[start_before:row_index]
+        std_x_before = np.nanstd(samples_before[dim1]) 
+        std_y_before = np.nanstd(samples_before[dim2]) 
+        std_z_before = np.nanstd(samples_before[dim3])
+        corr_before = np.corrcoef(samples_before[dim1], samples_before[dim2])[0, 1] 
+        corr_before = np.nan_to_num(corr_before, nan=0.0)
+        bcea_before = calculate_bcea_volume_noise(df, std_x_before, std_y_before, std_z_before, pearson_xy_col, pearson_yz_col, pearson_zx_col, k=1)
+
+        
+        samples_after = df[row_index + 1:end_after]
+        std_x_after = np.nanstd(samples_after[dim1]) 
+        std_y_after = np.nanstd(samples_after[dim2]) 
+        corr_after = np.corrcoef(samples_after[dim1], samples_after[dim2])[0, 1] 
+        corr_after = np.nan_to_num(corr_after, nan=0.0)
+        bcea_after = calculate_bcea_volume_noise(df, std_x_col, std_y_col, std_z_col, pearson_xy_col, pearson_yz_col, pearson_zx_col, k=1)
+
+
+        # Store the results
+        results_before.append(bcea_before)
+        results_after.append(bcea_after)
+        
+
+    # Add results as new columns to the DataFrame
+    df[f'bcea3dnoise_{dim1}{dim2}_Before_Win{window}'] = np.nan_to_num(results_before, nan=0.0)
+    df[f'bcea3dnoise_{dim1}{dim2}_After_Win{window}'] = np.nan_to_num(results_after, nan=0.0)
+    
+    return df
 
 ######################################## 11 FREQUENCY #######################################
 
