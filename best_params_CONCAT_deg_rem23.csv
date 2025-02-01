@@ -1,0 +1,8 @@
+Ground Truth,Best Parameters
+GT1,"{'max_depth': 2, 'n_estimators': 25}"
+GT2,"{'max_depth': 2, 'n_estimators': 25}"
+GT3,"{'max_depth': 2, 'n_estimators': 10}"
+GT4,"{'max_depth': 2, 'n_estimators': 25}"
+GT5,"{'max_depth': 2, 'n_estimators': 25}"
+GT6,"{'max_depth': 2, 'n_estimators': 25}"
+GT7,"{'max_depth': 2, 'n_estimators': 25}"

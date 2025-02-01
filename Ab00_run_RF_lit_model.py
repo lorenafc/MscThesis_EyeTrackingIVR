@@ -117,9 +117,10 @@ for i in range (1,8):
     
 
 
-## feature importace z!!!
 
-# # RANDOM FOREST - FIND BEST PARAMS:
+
+# ## RANDOM FOREST - FIND BEST PARAMS:
+# results = []
 
 # for i in range(1,8):
     
@@ -129,29 +130,54 @@ for i in range (1,8):
 #     y_test = y_test_dict[i]
     
 #     rfc=RandomForestClassifier()
+    
+# #     param_grid = { 
+# #     'n_estimators': [10, 25],  
+# #     'max_depth': range(1, 3)   # Adjusted the comment to avoid syntax error
+# # }
+    
+    
 #     param_grid = { 
 #         'n_estimators': [10, 25, 50, 100, 200], # like joep and zemblys[10,12,15,25,50,100,150,200,250], # add 25  - # 10, 25, 50, 100, 200. final version (there is 25 in joep best param - selected GT1 and GT2)
-#         'max_depth' : range(1,15,1)   # like joep [1,2,3,4,5,6,7,8,9,10,11,12,15] # add 2, 7, 4 joep best param 2 - GT2 and 7 GT6 
+#         'max_depth' : range(1,15,1) #change to 15  # like joep [1,2,3,4,5,6,7,8,9,10,11,12,15] # add 2, 7, 4 joep best param 2 - GT2 and 7 GT6 
 #     }
 #     CV_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv= 5)
 #     CV_rfc.fit(X_train, y_train)
+    
+#     best_params = CV_rfc.best_params_
 #     print(f" for the ground truth GT{i} the best parameters are: {CV_rfc.best_params_}")
 
-    
+#         # Append the results to the list
+#     results.append({'Ground Truth': f'GT{i}', 'Best Parameters': best_params})
+
+# # Convert the results list to a DataFrame
+# results_df = pd.DataFrame(results)
+
+# # Save the DataFrame to a CSV file
+# results_df.to_csv('data/best_params_CONCAT_deg_rem23.csv', index=False)
+
+# print("Best parameters have been saved to best_params.csv")
+
+
+
+
+
+
+
   
-#     best_params = CV_rfc.best_params_
+    best_params = CV_rfc.best_params_
     
-#     rf = RandomForestClassifier(n_estimators=best_params['n_estimators'], max_depth=best_params['max_depth'], n_jobs=-1) # replave by params.json instead of best params #GT1  max dep 6, n est 50.
-#     rf.fit(X_train, y_train)
+    rf = RandomForestClassifier(n_estimators=best_params['n_estimators'], max_depth=best_params['max_depth'], n_jobs=-1) # replave by params.json instead of best params #GT1  max dep 6, n est 50.
+    rf.fit(X_train, y_train)
     
-#     train_accuracy = rf.score(X_train, y_train)
-#     test_accuracy = rf.score(X_test, y_test)
-#     print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
-#     print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
+    train_accuracy = rf.score(X_train, y_train)
+    test_accuracy = rf.score(X_test, y_test)
+    print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
+    print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
     
-#     y_pred = rf.predict(X_test)
-#     print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
-#     print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
+    y_pred = rf.predict(X_test)
+    print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
+    print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
     
 
 

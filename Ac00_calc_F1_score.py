@@ -15,9 +15,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix, precision_score, recall_score, f1_score, mean_squared_error, mean_absolute_error
 import Aa01_funcs_extracting_features as funcs_feat
 
-# import Aa01_funcs_extracting_features_C_gitignore as funcs
-
-
 with open('config.json') as json_file:
     config = json.load(json_file)
 
