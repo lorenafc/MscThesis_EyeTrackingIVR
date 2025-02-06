@@ -42,24 +42,12 @@ preprocessed_et_data = pd.read_csv(config["preprocessed_data_file"])
 ####################################### VELOCITY AND ACCELERATION #################################################################
 ###################################################################################################################################
 
-# # add velocity to the eye tracking data - when I add this inside a function it keeps running forever.
-# eye_tracking_data_cm2deg_new = funcs.velocity(eye_tracking_data_cm2deg_new)
-
-# # add acceleration to the eye tracking data - when I add this inside a function it keeps running forever.
-# eye_tracking_data_cm2deg_new = funcs.acceleration(eye_tracking_data_cm2deg_new)
-
-
-# Velocity (◦/s) and acceleration (◦/s2) of the gaze points. calculated using a Savitzky–Golay filter with polynomial
-# order 2 and a window size of 12 ms—half the duration of shortest saccade, as suggested by Nystrom ¨ and Holmqvist (2010)
-# SAVITZKY-GOLD filter: https://medium.com/pythoneers/introduction-to-the-savitzky-golay-filter-a-comprehensive-guide-using-python-b2dd07a8e2ce#:~:text=The%20Savitzky%2DGolay%20filter%20is,explained%20further%20in%20this%20post).
-
 
 #calculate velocity - when I add this inside a function it keeps running forever.
 preprocessed_et_data["velocity_deg_s"] = preprocessed_et_data['cm_to_deg_inside_VE']/preprocessed_et_data["time_diff"]
 preprocessed_et_data["acceler_deg_s"] = preprocessed_et_data['velocity_deg_s']/preprocessed_et_data["time_diff"]
 
 
-### feature importance !!!
 
 
 ################################# 3 MEAN DIFFF #########################################################################
@@ -357,7 +345,7 @@ funcs_feat.save_df(only_bcea_3d_GTs, "data/Aa01_test_only_bcea3d_noise_GTs_rf.cs
 #between two 100ms windows, one before and one after the sample. Olsson (2007)
 
 
-bcea_diff_xy = funcs_feat.calculate_bcea2d_window(bcea_xy_yz_zx, "L_x", "L_y", k=1, window=5)
+bcea_diff_xy = funcs_feat.calculate_bcea2d_window(bcea_xy_yz_zx, "L_x", "L_y", k=1, window=5) #
 bcea_diff_yz = funcs_feat.calculate_bcea2d_window(bcea_diff_xy, "L_y", "L_z", k=1, window=5)
 bcea_diff_zx = funcs_feat.calculate_bcea2d_window(bcea_diff_yz, "L_z", "L_x", k=1, window=5)
 
@@ -382,35 +370,17 @@ bcea_diff_xy_xz_zx_deg_m_clean = funcs_feat.drop_and_reorder_columns(bcea_diff_d
 
 bcea_diff_xy_xz_zx_deg_clean = bcea_diff_xy_xz_zx_deg_m_clean.drop(columns=['bcea_diff_wind_dist_m'])
 
-## only beca m and deg with GTs
 
-# bcea_diff_xy_xz_zx_m_GTs = bcea_diff_xy_xz_zx_deg_m_clean[["bcea_diff_deg",'GT1','GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']]
-# bcea_diff_xy_xz_zx_deg_GTs = bcea_diff_xy_xz_zx_deg_m_clean[['bcea_diff_wind_dist_m', 'GT1','GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']]
 
-# funcs_feat.save_df(bcea_diff_xy_xz_zx_m_GTs, "data/Aa01_test_bcea_diff_xy_xz_zx_m_GTs.csv")
-# funcs_feat.save_df(bcea_diff_xy_xz_zx_deg_clean, "data/Aa01_bcea_diff_xy_xz_zx_deg_GTs.csv")
-
-####
-
-funcs_feat.save_df(bcea_diff_xy_xz_zx_deg_clean, config["prepr_and_features_file_updated"])
 
 #### Save just features and GTs ## CHANGE DF NAME AND JSON CSV FILE!!
 columns_to_keep = ['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree",  "std_deg", 'std_diff_deg', 'rms_deg', 'rms_diff_deg','bcea_L_xL_y', 'bcea_L_yL_z', 'bcea_L_zL_x', 'bcea_diff_deg', 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7' ]
-only_until_11_bceadiff_and_GTs = bcea_diff_xy_xz_zx_deg_clean[columns_to_keep] # CHANGE DF NAME- HERE!
-
-# bcea_diff_xy_xz_zx_deg_feat_GTs = funcs_feat.df_features_GTs(bcea_diff_xy_xz_zx_deg_clean,['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', "med_diff_deg", "disp_degree",  "std_deg", 'std_diff_deg', 'rms_deg', 'rms_diff_deg','bcea_L_xL_y', 'bcea_L_yL_z', 'bcea_L_zL_x', 'bcea_diff_deg', 'GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7'])
-
-funcs_feat.save_df(only_until_11_bceadiff_and_GTs, config["only_extracted_features_and_GTs_TEST_file"])
+only_until_11_bceadiff_and_GTs = bcea_diff_xy_xz_zx_deg_clean[columns_to_keep] 
 
 
-###################### DATA FOR CV IN THE RF ###################
 
-prepr_11_bcea_diff = pd.read_csv("data/prAzza01_only_extracted_features_GTs_eye_tracking_11BCEA_DIFF_DEG.csv")
-prepr_11_bcea_diff.columns
 
-#bcea_diff_obs = pd.concat([prepr_11_bcea_diff, pearson_zx["observer"]], axis=1)
 
-funcs_feat.save_df(bcea_diff_obs, "data/prA_bcea_diff_observ_GTs_CV_RF.csv")
 
 ######################## # 12 - Rayleightest - Tests whether the sample-to-sample directions in
 # a 22-ms window are uniformly distributed. Larsson et al. (2015)
