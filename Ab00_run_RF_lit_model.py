@@ -36,10 +36,12 @@ os.chdir(script_dir)
 # extracted_features = pd.read_csv(config["only_extracted_features_and_GTs_86Hz_file"]) #86Hz
 
 
-extracted_features = pd.read_csv( "data/RF/prAzza01_only_extracted_features_GTs_eye_tracking_11BCEA_DIFF_DEG.csv") #/RF/Aa01_test_xy_yz_zx_rf.csv") # bcea_diff 3d  degree added
+extracted_features = pd.read_csv( "data/RF/prA01_et_data_all_features_extracted_all_freq_CONCAT_RF_rem_23.csv") #/RF/Aa01_test_xy_yz_zx_rf.csv") # bcea_diff 3d  degree added
 # # extracted_features_add_feature = pd.read_csv("data/Aa01_test_only_bcea_yz_3d_GTs_rf.csv")
-extracted_features = extracted_features[['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', 'med_diff_deg',
-       'disp_degree', 'std_deg',  'bcea_L_yL_z', 'bcea_diff_deg','GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']] #'bcea_L_xL_y', 'bcea_L_zL_x', 
+extracted_features = extracted_features[['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', 'disp_degree',
+       'med_diff_deg', 'std_deg', 'std_diff_deg', 'rms_diff_deg', 'rms_deg',
+       'bcea_2d_yz_deg', 'bcea_diff_deg', 'GT1', 'GT2', 'GT3',
+       'GT4', 'GT5', 'GT6', 'GT7']] #'bcea_L_xL_y', 'bcea_L_zL_x', 
 ##removed xz an xy
 
 ### REMOVE OUTLIERS!!!!
