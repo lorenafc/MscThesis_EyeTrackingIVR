@@ -39,10 +39,65 @@ os.chdir(script_dir)
 extracted_features = pd.read_csv( "data/RF/prAzza01_only_extracted_features_GTs_eye_tracking_11BCEA_DIFF_DEG.csv") #/RF/Aa01_test_xy_yz_zx_rf.csv") # bcea_diff 3d  degree added
 # # extracted_features_add_feature = pd.read_csv("data/Aa01_test_only_bcea_yz_3d_GTs_rf.csv")
 extracted_features = extracted_features[['velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', 'med_diff_deg',
-       'disp_degree', 'std_deg', 'bcea_L_xL_y', 'bcea_L_yL_z', 'bcea_L_zL_x', 'bcea_diff_deg','GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']]
+       'disp_degree', 'std_deg',  'bcea_L_yL_z', 'bcea_diff_deg','GT1', 'GT2', 'GT3', 'GT4', 'GT5', 'GT6', 'GT7']] #'bcea_L_xL_y', 'bcea_L_zL_x', 
+##removed xz an xy
 
-####### REMEMBER TO RECALCULATE THE BEST PARAMS WHEN YOU EXTRACT ALL FEATURES (YOU ARE USING THE BEST PARAMS FOR VEL AND ACC ONLY)
-#### CALCULATE FEATURE IMPORTANCE!!!
+### REMOVE OUTLIERS!!!!
+
+Q1 = extracted_features.quantile(0.25)
+Q3 = extracted_features.quantile(0.75) # 22% data droped  - 83508 remaining (no bcea xz and xy)
+IQR = Q3 - Q1
+
+# Define outlier bounds
+lower_bound = Q1 - 3.0 * IQR
+upper_bound = Q3 + 3.0 * IQR
+
+
+print(f'Original data shape: {extracted_features.shape}')
+
+# Filter out outliers
+extracted_features = extracted_features[(extracted_features >= lower_bound) & (extracted_features <= upper_bound)].dropna()
+
+print(f'Data shape after removing outliers: {extracted_features.shape}')
+
+
+
+# # Define the columns to check for outliers
+# columns_to_check = [
+#     'velocity_deg_s', 'acceler_deg_s', 'mean_diff_deg', 'med_diff_deg',
+#            'disp_degree', 'std_deg',  'bcea_L_yL_z', 'bcea_diff_deg'
+# ]
+
+# # Calculate Q1, Q3, and IQR for the selected columns
+# Q1 = extracted_features[columns_to_check].quantile(0.25)
+# Q3 = extracted_features[columns_to_check].quantile(0.75)
+# IQR = Q3 - Q1
+
+# # Define outlier bounds with a larger multiplier
+# lower_bound = Q1 - 3.0 * IQR  # Use 5.0 instead of 3.0
+# upper_bound = Q3 + 3.0 * IQR
+
+# # Debugging: Print bounds and check for missing values
+# print("Lower Bound:")
+# print(lower_bound)
+# print("\nUpper Bound:")
+# print(upper_bound)
+# print("\nMissing values in each column:")
+# print(extracted_features[columns_to_check].isnull().sum())
+
+# # Drop rows with missing values in the selected columns
+# extracted_features_clean = extracted_features.dropna(subset=columns_to_check)
+
+# # Filter out outliers (only for the selected columns)
+# mask = (extracted_features_clean[columns_to_check] >= lower_bound) & (extracted_features_clean[columns_to_check] <= upper_bound)
+# extracted_features_no_out = extracted_features_clean[mask.all(axis=1)]
+
+# print(f'Original data shape: {extracted_features.shape}')
+# print(f'Data shape after removing outliers: {extracted_features_no_out.shape}') # 24% dropped out - 781083
+
+
+
+####### REMEMBER TO RECALCULATE THE BEST PARAMS WHEN YOU USE ZEMBLYS STUDY!!!
 
 # bcea_yz_only_rf = extracted_features.copy()
 
@@ -166,19 +221,19 @@ for i in range (1,8):
 
 
   
-    best_params = CV_rfc.best_params_
+    # best_params = CV_rfc.best_params_
     
-    rf = RandomForestClassifier(n_estimators=best_params['n_estimators'], max_depth=best_params['max_depth'], n_jobs=-1) # replave by params.json instead of best params #GT1  max dep 6, n est 50.
-    rf.fit(X_train, y_train)
+    # rf = RandomForestClassifier(n_estimators=best_params['n_estimators'], max_depth=best_params['max_depth'], n_jobs=-1) # replave by params.json instead of best params #GT1  max dep 6, n est 50.
+    # rf.fit(X_train, y_train)
     
-    train_accuracy = rf.score(X_train, y_train)
-    test_accuracy = rf.score(X_test, y_test)
-    print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
-    print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
+    # train_accuracy = rf.score(X_train, y_train)
+    # test_accuracy = rf.score(X_test, y_test)
+    # print(f"GT{i} - Train Accuracy: {train_accuracy * 100:.2f}%")
+    # print(f"GT{i} - Test Accuracy: {test_accuracy * 100:.2f}%")
     
-    y_pred = rf.predict(X_test)
-    print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
-    print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
+    # y_pred = rf.predict(X_test)
+    # print(f"Classification Report GT{i}:\n", classification_report(y_test, y_pred))
+    # print(f"Confusion Matrix GT{i}:\n", confusion_matrix(y_test, y_pred))
     
 
 
